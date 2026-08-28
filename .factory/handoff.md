@@ -25,6 +25,8 @@ npm run build               # dist/app and dist/site created
 npm run test:e2e            # 3 Chromium tests passed
 ```
 
+GitHub Actions run `33159016566` completed successfully across Linux, Windows, Apple Silicon macOS, and Intel macOS. Release `v0.1.0` contains nine assets. The published `latest.json` resolves through `/releases/latest/download/`; the 73.5 MB Linux AppImage was downloaded through that URL and passed its published SHA-256 (`ae4c356e161b847dd0201100a521eb20fd6c4eea0d1bc17d3688f69d21dc5f5a`). The shell installer was also executed with an isolated temporary home and installed the verified AppImage successfully.
+
 The end-to-end suite creates a real vault, imports before/after ICS files, finds moved and deleted events, selects the deleted event, and downloads a restore file. It also runs axe on the landing and populated app states: **0 serious/critical violations**. The 390 px viewport has no horizontal overflow and the landing page produces no console errors.
 
 Production-build Lighthouse mobile run (`lighthouse@12.8.2`, headless Chromium):
