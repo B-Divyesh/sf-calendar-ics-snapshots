@@ -40,7 +40,7 @@ Production-build Lighthouse mobile run (`lighthouse@12.8.2`, headless Chromium):
 | CLS | 0 |
 | Total blocking time | 0 ms |
 
-Payloads: landing JS 3.41 KB raw / 1.57 KB gzip; CSS 6.91 KB raw / 2.26 KB gzip; desktop UI JS 24.01 KB raw / 8.45 KB gzip; CSS 10.43 KB raw / 3.12 KB gzip. Hero variants are 12–136 KB; preferred mobile AVIF is 12 KB. No runtime CDN requests or font downloads.
+Payloads: landing JS 3.47 KB raw / 1.60 KB gzip; CSS 6.91 KB raw / 2.26 KB gzip; desktop UI JS 24.01 KB raw / 8.45 KB gzip; CSS 10.43 KB raw / 3.12 KB gzip. Hero variants are 12–136 KB; preferred mobile AVIF is 12 KB. No runtime CDN requests or font downloads.
 
 ## Known boundaries
 
