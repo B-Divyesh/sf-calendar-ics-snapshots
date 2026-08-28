@@ -16,10 +16,10 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@tauri-apps/api": "2.8.0"
+    "@tauri-apps/api": "2.11.1"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "2.8.4",
+    "@tauri-apps/cli": "2.11.4",
     "@axe-core/playwright": "4.10.2",
     "@playwright/test": "1.58.2",
     "@types/node": "22.12.0",
