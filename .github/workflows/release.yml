@@ -57,7 +57,7 @@ jobs:
           name: Calendar Snapshotter ${{ env.RELEASE_TAG }}
           generate_release_notes: true
           draft: false
-          prerelease: true
+          prerelease: false
           fail_on_unmatched_files: false
           files: |
             src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
