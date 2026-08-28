@@ -1,0 +1,30 @@
+{
+  "name": "calendar-ics-snapshots",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:site": "vite --config vite.site.config.ts",
+    "build": "npm run build:app && npm run build:site",
+    "build:app": "vite build",
+    "build:site": "vite build --config vite.site.config.ts",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:watch": "vitest",
+    "check": "tsc --noEmit && cargo check --manifest-path src-tauri/Cargo.toml",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "2.8.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.8.4",
+    "@axe-core/playwright": "4.10.2",
+    "@playwright/test": "1.58.2",
+    "@types/node": "22.12.0",
+    "typescript": "5.9.2",
+    "vite": "7.3.6",
+    "vitest": "3.2.7"
+  }
+}

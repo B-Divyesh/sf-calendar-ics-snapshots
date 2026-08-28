@@ -1,0 +1,27 @@
+[package]
+name = "calendar-snapshotter"
+version = "0.1.0"
+description = "Encrypted local version history for calendars"
+authors = ["Sociobot"]
+edition = "2021"
+license = "MIT"
+
+[lib]
+name = "calendar_snapshotter_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+tauri = { version = "2", features = [] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+url = "2"
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

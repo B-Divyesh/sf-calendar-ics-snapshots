@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Calendar Snapshotter",
+  "version": "0.1.0",
+  "identifier": "in.sociobot.calendar-ics-snapshots",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build:app",
+    "frontendDist": "../dist/app"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Calendar Snapshotter",
+        "width": 1180,
+        "height": 780,
+        "minWidth": 390,
+        "minHeight": 620,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' asset:; style-src 'self'; connect-src 'self' https://api.sociobot.in https://*.sociobot.in ipc: http://ipc.localhost"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "Productivity",
+    "shortDescription": "Encrypted local calendar history",
+    "longDescription": "Record encrypted ICS and CalDAV snapshots, inspect schedule changes, and restore selected events.",
+    "copyright": "Copyright 2026 Sociobot",
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"]
+  }
+}
