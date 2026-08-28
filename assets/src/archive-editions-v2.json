@@ -1,0 +1,7 @@
+{
+  "model": "factory-image via Azure AI Foundry",
+  "date": "2026-08-28",
+  "status": "accepted after visual inspection",
+  "prompt": "Replace the small black-and-white photographic print under the lock on the left with a plain abstract ledger card showing only halftone rectangles and paper texture. Keep the overlapping calendar sheets, matte black lock, tabs, red proof marks, lighting, composition, monochrome newsprint palette, and all other details unchanged. No people, no portraits, no faces, no readable text, no logos, no watermark.",
+  "base_prompt": "Top-down still life of overlapping translucent calendar pages recording the same week at different moments, one appointment visibly shifted through the layers, with a small matte-black archival lock and blank index tabs; monochrome cut-paper editorial collage, halftone photogravure, newsprint, carbon and oxblood; no readable text, logos, people, or watermark."
+}

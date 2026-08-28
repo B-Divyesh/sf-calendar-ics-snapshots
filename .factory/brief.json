@@ -1,0 +1,11 @@
+{
+  "slug": "calendar-ics-snapshots",
+  "title": "Calendar Snapshotter",
+  "territory": "utilities",
+  "user": "People who plan in calendars but need a recoverable, diffable local history when schedules shift or a calendar provider is unavailable.",
+  "smallest_useful_product": "Local scheduled CalDAV/ICS snapshot utility that stores encrypted versioned ICS files, summarizes added/moved/cancelled events, and restores selected events to an export file.",
+  "success_measure": "A pilot user can identify and restore a deliberately changed or deleted event from a snapshot in under two minutes.",
+  "artifact_class": "desktop-app",
+  "monetization": "one-time",
+  "constraints": "Encrypt stored credentials and event data; handle recurrence/time zones correctly; use CalDAV/ICS standards; avoid sending any event content to a third party."
+}
