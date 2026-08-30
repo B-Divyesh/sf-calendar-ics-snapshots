@@ -58,4 +58,5 @@ The Lighthouse CLI emitted a post-audit Chromium target-crash warning while capt
 
 1. Register the US$29 product in Sociobot billing with return URL `https://calendar-ics-snapshots.sociobot.in/?license={token}`.
 2. Add `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID`, `WINDOWS_CERT_PFX`, and `WINDOWS_CERT_PASSWORD` to add signing in the release workflow.
-3. After the repair deployment, create a fresh release tag when native package assets need the repaired product version.
+3. Deploy `dist/site` to the configured Calendar Snapshotter static host. The worker attempted this with the authenticated Static Web Apps CLI, but target lookup is denied for the worker identity and the CLI then stalled while resolving project settings. The temporary local `.env` it created was removed without being read. As of 2026-08-30 UTC, the live page still contains the old “Your calendar” copy, so live identity cannot yet be marked verified.
+4. After the repair deployment, create a fresh release tag when native package assets need the repaired product version.
