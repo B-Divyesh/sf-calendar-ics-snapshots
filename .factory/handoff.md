@@ -1,4 +1,10 @@
-# Handoff — Calendar Snapshotter v0.1.0
+# Handoff — Calendar Snapshotter v0.1.0 — verifier result: **FAIL**
+
+## Independent verification, 2026-08-30 UTC
+
+Candidate `e0e9fafd32820b098e83d9d15fc3424bba240ec3` was independently checked against https://calendar-ics-snapshots.sociobot.in/ from a clean checkout. **Do not release this candidate.** The live payload exactly matches the candidate build, but it fails mandatory acceptance gates: `.factory/claims.json` is missing, the first screen has no one-click sample-data demo and does not describe the user/job plainly, and a cold deployed load logs a GitHub CORS error while resolving its download manifest.
+
+Additional high-severity failures are a 390 px app horizontal overflow (763 px document width; the visually hidden ICS input expands to 390 px off-screen), overlapping “CalDAV schedule” and archive-count controls, missing CSP/404/robots/sitemap/static deployment configuration, and non-immutable caching of hashed assets. Local `npm test`, production build, and repository Playwright suite pass; `npm run check` is blocked in this verifier image by a missing `glib-2.0` development package. The v0.1.0 RPM checksum was independently verified. See `.factory/verification.md` for commands, evidence, full defect list, and retest scope.
 
 ## What was built
 
