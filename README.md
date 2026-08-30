@@ -17,6 +17,10 @@ Live site: <https://calendar-ics-snapshots.sociobot.in>
 
 The free app includes unlimited manual snapshots, diffs, and restore exports. A US$29 one-time Continuity license unlocks CalDAV scheduling through the Sociobot billing API. Accessibility, data export, and recovery are never paywalled.
 
+## Try the sample project
+
+Use the desktop browser entry at `/?demo=1`, or visit [the demo page](https://calendar-ics-snapshots.sociobot.in/demo/). It opens two realistic Northstar studio calendar editions in the separate IndexedDB database `demo:calendar-snapshotter`. The second edition moves a planning review and removes an airport train. The demo banner can reset its own data or return to a real vault without copying anything.
+
 ## Install
 
 Download the detected installer from the [landing page](https://calendar-ics-snapshots.sociobot.in), or use a checksum-verifying installer:
@@ -50,9 +54,12 @@ npm run test:e2e     # Chromium recovery journey + axe accessibility checks
 npm run check        # TypeScript and Rust checks
 npm run build        # dist/app and dist/site
 npm run build:site   # exact static deploy output: dist/site
+./scripts/verify-url.sh http://127.0.0.1:4174/ # semantic smoke check with dev:site running
 ```
 
-The release workflow runs for `v*` tags and can be dispatched manually. It builds native packages on GitHub-hosted macOS, Windows, and Linux runners.
+Every visitor-facing promise is listed in `.factory/claims.json`. Run the exact declared commands from that file, or run all browser claim coverage with `npm run test:e2e -- --grep @claim`.
+
+The release workflow runs for `v*` tags and can be dispatched manually. It builds native packages on GitHub-hosted macOS, Windows, and Linux runners. Static deployment publishes `dist/site`; it includes CSP and security headers, cache policy for hashed assets, `robots.txt`, `sitemap.xml`, and a styled 404 through `staticwebapp.config.json`.
 
 ## Privacy and security model
 

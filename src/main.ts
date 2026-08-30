@@ -1,8 +1,9 @@
 import { invoke } from "@tauri-apps/api/core";
 import "./styles.css";
 import { buildRestoreCalendar, diffCalendars, mergeCalDavResponse, parseIcs, type CalendarChange } from "./core/ics";
-import { Vault, fingerprint, type Snapshot } from "./core/vault";
+import { Vault, configureVaultStorage, fingerprint, removeVaultStorage, type Snapshot } from "./core/vault";
 import { cachedUnlock, captureLicense, checkoutUrl, saveLicense, storedLicense, verifyLicense } from "./core/license";
+import { sampleVaultData } from "./core/sample";
 
 const app = document.querySelector<HTMLDivElement>("#app")!;
 const isTauri = "__TAURI_INTERNALS__" in window;
@@ -11,6 +12,10 @@ let selectedSnapshotId = "";
 let selectedChanges = new Set<string>();
 let unlocked = cachedUnlock();
 let scheduler: number | undefined;
+const demoMode = new URLSearchParams(location.search).get("demo") === "1";
+const DEMO_PASSPHRASE = "sample calendar vault";
+
+if (demoMode) configureVaultStorage("demo:calendar-snapshotter");
 
 const escapeHtml = (value: string) => value.replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]!));
 const dateLabel = (iso: string) => new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(iso));
@@ -26,6 +31,13 @@ function announce(message: string, error = false): void {
 captureLicense();
 
 async function start(): Promise<void> {
+  if (demoMode) {
+    const exists = await Vault.exists();
+    vault = exists ? await Vault.open(DEMO_PASSPHRASE) : await Vault.createWithData(DEMO_PASSPHRASE, await sampleVaultData());
+    selectedSnapshotId = vault.data.snapshots.at(-1)?.id || "";
+    renderApp();
+    return;
+  }
   renderLock(false);
   const exists = await Vault.exists();
   renderLock(exists);
@@ -51,6 +63,7 @@ function renderLock(exists: boolean): void {
           ${exists ? "" : `<label for="confirm">Repeat passphrase</label><input id="confirm" name="confirm" type="password" minlength="10" autocomplete="new-password" required>`}
           <p class="field-note" id="pass-hint">At least 10 characters. Stored data uses AES-256-GCM encryption.</p>
           <button class="button primary" type="submit">${exists ? "Unlock archive" : "Create archive"}</button>
+          ${exists ? "" : `<button class="button secondary" id="load-sample" type="button">Load sample project</button><p class="field-note">It opens a separate sample vault. Your archive is not read or changed.</p>`}
           <p id="status" class="status" role="status" aria-live="polite"></p>
         </form>
       </section>
@@ -76,6 +89,11 @@ function renderLock(exists: boolean): void {
       button.textContent = exists ? "Unlock archive" : "Create archive";
     }
   });
+  document.querySelector("#load-sample")?.addEventListener("click", () => {
+    const url = new URL(location.href);
+    url.searchParams.set("demo", "1");
+    location.assign(url.toString());
+  });
 }
 
 function snapshotChanges(snapshot: Snapshot): CalendarChange[] {
@@ -98,6 +116,7 @@ function renderApp(): void {
   const changes = selected ? snapshotChanges(selected) : [];
   selectedChanges = new Set([...selectedChanges].filter((id) => changes.some((change) => change.id === id)));
   app.innerHTML = `
+    ${demoMode ? `<aside class="demo-banner" aria-label="Demo mode"><strong>Demo — sample data, nothing is saved to your archive.</strong><span><button class="text-button" id="reset-demo">Reset demo</button><button class="text-button" id="start-real">Start for real</button></span></aside>` : ""}
     <header class="app-header">
       <div>
         <p class="eyebrow">Local continuity desk</p>
@@ -236,6 +255,15 @@ function bindAppEvents(): void {
   document.querySelector<HTMLFormElement>("#connection-form")?.addEventListener("submit", saveConnection);
   document.querySelector("#run-connection")?.addEventListener("click", () => runConnection(true));
   document.querySelector<HTMLFormElement>("#restore-license")?.addEventListener("submit", restoreLicense);
+  document.querySelector("#reset-demo")?.addEventListener("click", async () => {
+    await removeVaultStorage();
+    location.reload();
+  });
+  document.querySelector("#start-real")?.addEventListener("click", () => {
+    const url = new URL(location.href);
+    url.searchParams.delete("demo");
+    location.assign(url.toString());
+  });
 }
 
 function chooseFile(): void { document.querySelector<HTMLInputElement>("#ics-file")?.click(); }

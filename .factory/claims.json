@@ -1,0 +1,51 @@
+[
+  {
+    "id": "sample-project",
+    "claim": "Try the app with an isolated sample calendar project",
+    "where": "landing first screen, demo page, desktop first-run screen",
+    "test": "npm run test:e2e -- --grep @claim:sample-project",
+    "sandbox": "fresh browser context at /?demo=1; assert two sample editions and the persistent demo banner"
+  },
+  {
+    "id": "calendar-diff",
+    "claim": "Shows moved and cancelled events between calendar copies",
+    "where": "landing How it works, desktop sample project",
+    "test": "npm run test:e2e -- --grep @claim:calendar-diff",
+    "sandbox": "fresh browser context at /?demo=1; inspect the shipped sample edition"
+  },
+  {
+    "id": "ics-restore-export",
+    "claim": "Exports selected earlier events to an ICS file",
+    "where": "landing How it works, desktop sample project",
+    "test": "npm run test:e2e -- --grep @claim:ics-restore-export",
+    "sandbox": "fresh browser context at /?demo=1; select the cancelled sample event and inspect the downloaded ICS"
+  },
+  {
+    "id": "demo-private",
+    "claim": "Sample data stays separate from your archive",
+    "where": "landing first screen, demo page, desktop demo banner",
+    "test": "npm run test:e2e -- --grep @claim:demo-private",
+    "sandbox": "fresh browser context at /?demo=1; record requests and IndexedDB database names"
+  },
+  {
+    "id": "no-event-telemetry",
+    "claim": "The app has no analytics or third-party calendar processing",
+    "where": "landing privacy section, app lock screen",
+    "test": "npm run test:e2e -- --grep @claim:no-event-telemetry",
+    "sandbox": "fresh browser context at /?demo=1; record the complete request log and assert that every request is same-origin"
+  },
+  {
+    "id": "encrypted-local-vault",
+    "claim": "Snapshots are encrypted before local storage",
+    "where": "landing privacy section, app vault screen",
+    "test": "npm run test:e2e -- --grep @claim:encrypted-local-vault",
+    "sandbox": "fresh browser context; create a vault, import a known event, then assert its IndexedDB envelope does not contain the event title"
+  },
+  {
+    "id": "license-price",
+    "claim": "A one-time scheduling license costs US$29",
+    "where": "landing first screen and license section",
+    "test": "npm run test:e2e -- --grep @claim:license-price",
+    "sandbox": "landing page fixture; assert the stated one-time price and the free manual restore path"
+  }
+]

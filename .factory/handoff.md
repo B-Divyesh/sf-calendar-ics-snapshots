@@ -1,64 +1,61 @@
-# Handoff — Calendar Snapshotter v0.1.0 — verifier result: **FAIL**
+# Handoff — Calendar Snapshotter v0.1.0 repair
 
-## Independent verification, 2026-08-30 UTC
+## Repair completed
 
-Candidate `e0e9fafd32820b098e83d9d15fc3424bba240ec3` was independently checked against https://calendar-ics-snapshots.sociobot.in/ from a clean checkout. **Do not release this candidate.** The live payload exactly matches the candidate build, but it fails mandatory acceptance gates: `.factory/claims.json` is missing, the first screen has no one-click sample-data demo and does not describe the user/job plainly, and a cold deployed load logs a GitHub CORS error while resolving its download manifest.
+This repair addresses every failure in verification `e092ca26414b4716cb48bdffb508195215d25747`:
 
-Additional high-severity failures are a 390 px app horizontal overflow (763 px document width; the visually hidden ICS input expands to 390 px off-screen), overlapping “CalDAV schedule” and archive-count controls, missing CSP/404/robots/sitemap/static deployment configuration, and non-immutable caching of hashed assets. Local `npm test`, production build, and repository Playwright suite pass; `npm run check` is blocked in this verifier image by a missing `glib-2.0` development package. The v0.1.0 RPM checksum was independently verified. See `.factory/verification.md` for commands, evidence, full defect list, and retest scope.
+- Added `.factory/claims.json` with seven observable claim commands and browser coverage for every claim.
+- Added a one-click sample project at desktop `/?demo=1`, the site `/demo/`, a persistent demo banner, reset/start-for-real controls, and `.factory/demo.md`. Demo state uses only `demo:calendar-snapshotter`; real vault state uses `calendar-snapshotter`.
+- Rewrote the landing first screen in plain language: it states the calendar recovery job, who it is for, the sample action, and three concise facts. `.factory/copy-audit.md` records the review.
+- Repaired release resolution to use only the CORS-enabled `api.github.com` release response. It caches metadata for one hour and selects the platform asset directly; it never browser-fetches `latest.json` or a GitHub download redirect. Missing assets render “Downloads are being published” without throwing.
+- Fixed the 390 px app regression: the file input remains 1×1 px when hidden, and the CalDAV action is in normal mobile flow instead of overlapping the archive heading.
+- Added the static host structure: CSP and security headers, immutable hashed asset caching, navigation fallback, designed 404, robots, sitemap, canonical/OG metadata, and a `verify-url.sh` smoke helper.
+- Added three hand-authored SVG walkthrough frames to the existing original editorial visual system. They show the shipped sample archive, change selection, and ICS export.
 
-## What was built
-
-- Tauri 2 desktop application with a small vanilla TypeScript interface.
-- AES-256-GCM local vault with PBKDF2-SHA-256 key derivation (310,000 iterations); calendar data and CalDAV credentials persist only inside the encrypted IndexedDB envelope.
-- ICS ingestion, recurrence override identity, timezone preservation, SHA-256 change detection, readable added/moved/cancelled diffs, and selective standards-compatible restore export.
-- Direct ICS GET and CalDAV `calendar-query` REPORT through a Rust bridge with authentication, redirect limit, timeout, and a 20 MB response guard.
-- In-app 15-minute/hourly/daily scheduler while the app is running, gated by the US$29 one-time Sociobot license. Manual snapshots, diffs, and restore export stay free.
-- Empty, offline, invalid-file, wrong-passphrase, unchanged-snapshot, connection-error, and inactive-license states.
-- Responsive keyboard-accessible app and 390 px landing treatment, legal pages, OS-detected downloads, and checksum-verifying installers.
-- Tag-triggered GitHub Actions release matrix for Apple Silicon/Intel macOS, Windows x64, and Linux x64. It publishes DMG, MSI/EXE, AppImage, DEB, RPM, `SHA256SUMS`, and `latest.json` via `softprops/action-gh-release`.
-- Original generated editorial hero plate and hand-authored app mark; provenance is in `.factory/design.md` and `assets/src/archive-editions-v2.json`.
-
-## Verification performed
-
-All commands were run from `/work/repo` on 2026-08-28:
+## How to run and verify
 
 ```sh
-npm audit --omit=dev        # 0 vulnerabilities
-npm test                    # 2 files, 5 tests passed
-npx tsc --noEmit            # passed
-cargo check --manifest-path src-tauri/Cargo.toml  # passed
-npm run build               # dist/app and dist/site created
-npm run test:e2e            # 3 Chromium tests passed
+npm ci
+npm test
+npm run check
+npm run build
+npm run test:e2e
+npm run test:e2e -- --grep @claim
+npm run dev:site -- --host 127.0.0.1 --port 4174
+./scripts/verify-url.sh http://127.0.0.1:4174/
+./scripts/verify-url.sh http://127.0.0.1:4174/demo/
 ```
 
-GitHub Actions run `33159016566` completed successfully across Linux, Windows, Apple Silicon macOS, and Intel macOS. Release `v0.1.0` contains nine assets. The published `latest.json` resolves through `/releases/latest/download/`; the 73.5 MB Linux AppImage was downloaded through that URL and passed its published SHA-256 (`ae4c356e161b847dd0201100a521eb20fd6c4eea0d1bc17d3688f69d21dc5f5a`). The shell installer was also executed with an isolated temporary home and installed the verified AppImage successfully.
+Static deployment output remains `dist/site` (`npm run build:site` is the exact deploy build). Native packages remain GitHub Actions-only, preserving the original Tauri desktop-app release class.
 
-The end-to-end suite creates a real vault, imports before/after ICS files, finds moved and deleted events, selects the deleted event, and downloads a restore file. It also runs axe on the landing and populated app states: **0 serious/critical violations**. The 390 px viewport has no horizontal overflow and the landing page produces no console errors.
+## Evidence — 2026-08-30 UTC
 
-Production-build Lighthouse mobile run (`lighthouse@12.8.2`, headless Chromium):
+| Check | Result |
+| --- | --- |
+| `npm test` | PASS — 5 tests |
+| `npm run check` | PASS — TypeScript and Rust/Tauri check (after installing standard Linux Tauri development packages) |
+| `npm run build` | PASS — `dist/app` and `dist/site` |
+| `npm run test:e2e` | PASS — 14 Chromium tests |
+| Each exact command in `.factory/claims.json` | PASS — one test per command; 7 declared claims / 6 tagged tests because the private-demo network test proves both isolated storage and no telemetry |
+| Accessibility | PASS — axe has 0 serious/critical findings on landing and populated app; keyboard skip-link journey tested |
+| 390 px | PASS — landing and populated sample app have no horizontal overflow; archive controls do not overlap |
+| Offline | PASS — after load, sample vault exports a selected event while browser network is offline |
+| Release metadata | PASS — mocked CORS-enabled GitHub API selects a Linux AppImage; `latest.json` is never requested; missing asset state is calm with no console error |
+| Privacy | PASS — demo request log contains same-origin requests only; known event text is absent from the real IndexedDB envelope |
+| URL smoke | PASS — `/` and `/demo/` have title, `lang`, main landmark, and image alt coverage |
+| Lighthouse on built static output | 100 performance / 100 accessibility / 100 best practices / 100 SEO; FCP 0.9 s, LCP 1.4 s, CLS 0 |
 
-| Category / metric | Result |
-| --- | ---: |
-| Performance | 100 |
-| Accessibility | 100 |
-| Best practices | 100 |
-| SEO | 92 |
-| FCP | 0.9 s |
-| LCP | 1.2 s |
-| CLS | 0 |
-| Total blocking time | 0 ms |
-
-Payloads: landing JS 3.47 KB raw / 1.60 KB gzip; CSS 6.91 KB raw / 2.26 KB gzip; desktop UI JS 24.01 KB raw / 8.45 KB gzip; CSS 10.43 KB raw / 3.12 KB gzip. Hero variants are 12–136 KB; preferred mobile AVIF is 12 KB. No runtime CDN requests or font downloads.
+The Lighthouse CLI emitted a post-audit Chromium target-crash warning while capturing its final screenshot, but wrote the complete report and category results above. The independent Playwright console and axe checks are clean.
 
 ## Known boundaries
 
-- Scheduled snapshots run while Calendar Snapshotter is open; v0.1 does not install a background daemon or wake a sleeping computer.
-- CalDAV servers vary in discovery/auth behavior. v0.1 accepts a direct collection URL or direct ICS URL; automatic principal/home-set discovery is not included.
-- Parsing focuses on VEVENT recovery. Raw event/timezone components are preserved, but VTODO/VJOURNAL diffs are not shown.
-- Static deployment is `npm run build:site` → `dist/site`. Native packages are intentionally produced only by GitHub Actions.
+- Scheduled snapshots run only while the desktop app is open.
+- CalDAV collection discovery is not included; users supply a direct collection or ICS URL.
+- v0.1 shows recovery for VEVENT calendar events; it does not present VTODO/VJOURNAL diffs.
+- Native packages are unsigned until the owner supplies signing credentials.
 
 ## Needs operator action
 
-1. Register `calendar-ics-snapshots` in the Sociobot billing system at US$29 with return URL `https://calendar-ics-snapshots.sociobot.in/?license={token}`. No product ID is hard-coded.
-2. Complete signing when certificates are available. Future secret names: `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID`, `WINDOWS_CERT_PFX`, and `WINDOWS_CERT_PASSWORD`. Add certificate import/signing steps to the workflow; packages are clearly marked unsigned until then.
-3. Verify the first GitHub-hosted release assets. Homebrew/Scoop/winget are CLI channels and not part of this desktop-app release; DMG/MSI/EXE/AppImage/DEB/RPM are supplied.
+1. Register the US$29 product in Sociobot billing with return URL `https://calendar-ics-snapshots.sociobot.in/?license={token}`.
+2. Add `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID`, `WINDOWS_CERT_PFX`, and `WINDOWS_CERT_PASSWORD` to add signing in the release workflow.
+3. After the repair deployment, create a fresh release tag when native package assets need the repaired product version.

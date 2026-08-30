@@ -25,7 +25,7 @@ export type VaultData = {
 
 type Envelope = { version: 1; salt: string; iv: string; data: string };
 
-const DB_NAME = "calendar-snapshotter";
+let databaseName = "calendar-snapshotter";
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 const bytesToBase64 = (bytes: Uint8Array) => btoa(Array.from(bytes, (byte) => String.fromCharCode(byte)).join(""));
@@ -33,10 +33,24 @@ const base64ToBytes = (value: string) => Uint8Array.from(atob(value), (char) => 
 
 function database(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1);
+    const request = indexedDB.open(databaseName, 1);
     request.onupgradeneeded = () => request.result.createObjectStore("vault");
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
+  });
+}
+
+/** Selects the independent demo vault before any vault operation starts. */
+export function configureVaultStorage(name: string): void {
+  databaseName = name;
+}
+
+export async function removeVaultStorage(): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    const request = indexedDB.deleteDatabase(databaseName);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+    request.onblocked = () => reject(new Error("Close the other Calendar Snapshotter window before resetting the demo."));
   });
 }
 
@@ -90,6 +104,14 @@ export class Vault {
     if (passphrase.length < 10) throw new Error("Use at least 10 characters for the vault passphrase.");
     const salt = crypto.getRandomValues(new Uint8Array(16));
     const vault = new Vault(await deriveKey(passphrase, salt), salt, { version: 1, snapshots: [] });
+    await vault.save();
+    return vault;
+  }
+
+  static async createWithData(passphrase: string, data: VaultData): Promise<Vault> {
+    if (passphrase.length < 10) throw new Error("Use at least 10 characters for the vault passphrase.");
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const vault = new Vault(await deriveKey(passphrase, salt), salt, data);
     await vault.save();
     return vault;
   }

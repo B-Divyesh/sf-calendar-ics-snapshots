@@ -5,7 +5,7 @@ const RELEASE_API = `https://api.github.com/repos/${REPO}/releases/latest`;
 const LICENSE_KEY = "sb_license:calendar-ics-snapshots";
 const VERDICT_KEY = `${LICENSE_KEY}:verdict`;
 type Platform = "macos_arm64" | "macos_x64" | "windows" | "linux";
-type ReleaseManifest = { version: string; platforms: Record<Platform, { url: string; name: string; sha256: string }> };
+type Release = { tag_name: string; assets?: { name: string; browser_download_url: string }[] };
 
 function platform(): Platform {
   const hint = (navigator as Navigator & { userAgentData?: { platform: string } }).userAgentData?.platform || navigator.platform || navigator.userAgent;
@@ -19,28 +19,27 @@ async function resolveDownload(): Promise<void> {
   const note = document.querySelector<HTMLElement>("#platform-note")!;
   const selected = platform();
   const label = selected.startsWith("macos") ? "macOS" : selected === "windows" ? "Windows" : "Linux";
-  if (["127.0.0.1", "localhost"].includes(location.hostname)) {
-    button.textContent = `Download for ${label}`;
-    note.textContent = "Release manifest loads on the published site";
-    return;
-  }
   try {
-    const releaseResponse = await fetch(RELEASE_API, { cache: "no-cache" });
-    if (!releaseResponse.ok) throw new Error("No published release");
-    const release = await releaseResponse.json() as { assets?: { name: string; browser_download_url: string }[] };
-    const manifestAsset = release.assets?.find((asset) => asset.name === "latest.json");
-    if (!manifestAsset) throw new Error("No release manifest");
-    const response = await fetch(manifestAsset.browser_download_url, { cache: "no-cache" });
-    if (!response.ok) throw new Error("Release manifest unavailable");
-    const manifest = await response.json() as ReleaseManifest;
-    const asset = manifest.platforms[selected];
-    if (!asset?.url) throw new Error("Platform asset missing");
-    button.href = asset.url;
+    const cacheKey = "calendar-snapshotter:release:v1";
+    const cached = JSON.parse(localStorage.getItem(cacheKey) || "null") as { savedAt: number; release: Release } | null;
+    const releaseResponse = cached && Date.now() - cached.savedAt < 3_600_000 ? undefined : await fetch(RELEASE_API, { cache: "no-cache" });
+    if (releaseResponse && !releaseResponse.ok) throw new Error("No published release");
+    const release = cached && !releaseResponse ? cached.release : await releaseResponse!.json() as Release;
+    if (releaseResponse) localStorage.setItem(cacheKey, JSON.stringify({ savedAt: Date.now(), release }));
+    const patterns: Record<Platform, RegExp> = {
+      macos_arm64: /(aarch64|arm64).*\.dmg$/i,
+      macos_x64: /(x64|x86_64).*\.dmg$/i,
+      windows: /(setup.*\.exe|\.msi)$/i,
+      linux: /\.AppImage$/i
+    };
+    const asset = release.assets?.find((item) => patterns[selected].test(item.name));
+    if (!asset?.browser_download_url) throw new Error("Platform asset missing");
+    button.href = asset.browser_download_url;
     button.textContent = `Download for ${label}`;
-    note.textContent = `${manifest.version} · checksum published`;
+    note.textContent = `${release.tag_name} · checksum published`;
   } catch {
-    button.textContent = "View available downloads";
-    note.textContent = "Release assets are listed on GitHub";
+    button.textContent = "View release downloads";
+    note.textContent = "Downloads are being published. The release page will update soon.";
   }
 }
 
@@ -85,3 +84,17 @@ if (form && field) {
   });
 }
 if (document.querySelector("#download-button")) void resolveDownload();
+
+document.querySelector("#reset-demo")?.addEventListener("click", async () => {
+  const status = document.querySelector<HTMLElement>("#demo-status");
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const request = indexedDB.deleteDatabase("demo:calendar-snapshotter");
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+    if (status) status.textContent = "The sample vault was reset.";
+  } catch {
+    if (status) status.textContent = "Close the desktop app, then reset the sample again.";
+  }
+});

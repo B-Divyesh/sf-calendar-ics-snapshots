@@ -6,56 +6,66 @@
     <meta name="theme-color" content="#f3f0e8">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/site.css">
-    <meta name="description" content="Encrypted local calendar snapshots, readable schedule diffs, and one-event restore for macOS, Windows, and Linux.">
-    <title>Calendar Snapshotter — local history for calendars</title>
+    <meta name="description" content="Keep local calendar copies, compare changes, and restore selected events on macOS, Windows, and Linux.">
+    <link rel="canonical" href="https://calendar-ics-snapshots.sociobot.in/">
+    <meta property="og:title" content="Calendar Snapshotter — recover calendar changes">
+    <meta property="og:description" content="Keep local calendar copies, compare changes, and restore selected events.">
+    <meta property="og:image" content="https://calendar-ics-snapshots.sociobot.in/assets/archive-editions-1200.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <title>Calendar Snapshotter — recover calendar changes</title>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to main content</a>
     <header class="site-header">
       <a class="wordmark" href="/" aria-label="Calendar Snapshotter home"><span>Calendar</span> Snapshotter</a>
-      <nav aria-label="Main navigation"><a href="#method">How it works</a><a href="#license">License</a><a href="https://github.com/B-Divyesh/sf-calendar-ics-snapshots" rel="noreferrer">Source</a></nav>
+      <nav aria-label="Main navigation"><a href="/demo/">Demo</a><a href="#method">How it works</a><a href="#license">License</a><a href="https://github.com/B-Divyesh/sf-calendar-ics-snapshots" rel="noreferrer">Source</a></nav>
     </header>
-    <main id="main">
+    <main id="main" tabindex="-1">
       <section class="hero">
         <div class="hero-copy">
-          <p class="edition-line">Local continuity desk · Vol. I · 2026</p>
-          <h1>Your calendar<br><em>has a history.</em></h1>
-          <p class="deck">Record encrypted editions. Read exactly what moved or disappeared. Restore one event without rolling back the week.</p>
-          <div class="download-row"><a class="button primary" id="download-button" href="https://github.com/B-Divyesh/sf-calendar-ics-snapshots/releases/latest">View downloads</a><span id="platform-note" role="status">Detecting your platform…</span></div>
-          <p class="fine-print">Free manual snapshots and restores · macOS, Windows, Linux · no calendar data leaves your computer</p>
+          <p class="edition-line">Local calendar recovery</p>
+          <h1>Keep a recoverable<br><em>calendar history.</em></h1>
+          <p class="deck">For people whose plans change, it keeps local copies ready to compare and restore.</p>
+          <div class="demo-action"><a class="button primary" href="/demo/">Try it with sample data</a><span>Opens a safe sample project.</span></div>
+          <div class="download-row"><a class="button secondary" id="download-button" href="https://github.com/B-Divyesh/sf-calendar-ics-snapshots/releases/latest">View release downloads</a><span id="platform-note" role="status">Checking downloads…</span></div>
+          <ul class="plain-facts"><li>Sample data stays separate from your archive.</li><li>Manual snapshots and restore exports are free.</li><li>One-time scheduling license: US$29.</li></ul>
         </div>
         <figure class="hero-plate">
           <picture><source type="image/avif" srcset="/assets/archive-editions-720.avif 720w, /assets/archive-editions-1200.avif 1200w" sizes="(max-width: 800px) 100vw, 58vw"><source type="image/webp" srcset="/assets/archive-editions-720.webp 720w, /assets/archive-editions-1200.webp 1200w" sizes="(max-width: 800px) 100vw, 58vw"><img src="/assets/archive-editions-1200.jpg" width="1200" height="820" alt="Layered paper calendar editions with one appointment moving between versions beside an archival lock" fetchpriority="high" decoding="async"></picture>
-          <figcaption>Fig. 1 — Three editions, one moved appointment, no cloud intermediary.</figcaption>
+          <figcaption>Local calendar copies make changed appointments easier to recover.</figcaption>
         </figure>
       </section>
-      <section class="ticker" aria-label="Product summary"><span>Encrypted at rest</span><span>Human-readable diffs</span><span>Standard ICS restore</span><span>Local by design</span></section>
+      <section class="ticker" aria-label="Product summary"><span>Local encrypted vault</span><span>Readable changes</span><span>ICS restore export</span><span>No analytics</span></section>
       <section class="problem" id="method">
-        <div class="section-heading"><p>01 / The correction desk</p><h2>Current truth is not the whole record.</h2></div>
-        <div class="problem-copy"><p class="dropcap">Calendars are operational data. Meetings move, providers go offline, and yesterday’s useful plan quietly disappears beneath today’s sync.</p><p>Snapshotter keeps encrypted local editions and compares each against the last. A cancelled appointment is shown with its former time; a moved one keeps the earlier form ready for export.</p></div>
+        <div class="section-heading"><p>01 / Why keep copies</p><h2>Find what changed in a schedule.</h2></div>
+        <div class="problem-copy"><p class="dropcap">Meetings move. Events disappear. A provider may be unavailable when you need an earlier plan.</p><p>Calendar Snapshotter compares each local copy. It marks added, moved, and cancelled events for review.</p></div>
       </section>
       <section class="method" aria-labelledby="method-title">
-        <p class="kicker">The two-minute recovery route</p><h2 id="method-title">Record. Compare. Recover.</h2>
+        <p class="kicker">How it works</p><h2 id="method-title">Save. Compare. Restore.</h2>
         <ol>
-          <li><span>01</span><div><h3>Take an edition</h3><p>Import any ICS file for free, or connect a CalDAV collection for scheduled capture while the app runs.</p></div></li>
-          <li><span>02</span><div><h3>Read the change desk</h3><p>Added, moved, and cancelled events appear as a quiet ledger—not a wall of calendar markup.</p></div></li>
-          <li><span>03</span><div><h3>Export only what matters</h3><p>Select one or several earlier events. Snapshotter builds a timezone-aware ICS file any calendar can import.</p></div></li>
+          <li><span>01</span><div><h3>Save a copy</h3><p>Import an ICS file. Optionally schedule CalDAV copies while the app is open.</p></div></li>
+          <li><span>02</span><div><h3>Review changes</h3><p>See added, moved, and cancelled events in a short list.</p></div></li>
+          <li><span>03</span><div><h3>Restore selected events</h3><p>Export selected earlier events to an ICS file for import into your calendar.</p></div></li>
         </ol>
       </section>
       <section class="proof" aria-labelledby="proof-title">
-        <div><p class="kicker">A private archive, not another provider</p><h2 id="proof-title">The calendar stays yours.</h2></div>
+        <div><p class="kicker">Privacy and limits</p><h2 id="proof-title">Your calendar is not a hosted service.</h2></div>
         <dl>
-          <div><dt>AES-256-GCM</dt><dd>Snapshots and saved credentials are encrypted before local storage.</dd></div>
-          <div><dt>Zero event telemetry</dt><dd>No analytics, ad pixels, remote fonts, or third-party calendar processing.</dd></div>
-          <div><dt>Open on exit</dt><dd>Recovery exports are ordinary RFC 5545 ICS files, not a proprietary backup.</dd></div>
-          <div><dt>Recurrence kept intact</dt><dd>Recurring masters, exceptions, TZIDs, and VTIMEZONE definitions are preserved.</dd></div>
+          <div><dt>Encrypted vault</dt><dd>Snapshots and saved credentials are encrypted before local storage.</dd></div>
+          <div><dt>No event telemetry</dt><dd>The app has no analytics or third-party calendar processing.</dd></div>
+          <div><dt>Open export</dt><dd>Restore files use the standard ICS format.</dd></div>
+          <div><dt>Important limit</dt><dd>Scheduled copies run only while Calendar Snapshotter is open.</dd></div>
         </dl>
       </section>
       <section class="license" id="license" aria-labelledby="license-title">
         <div class="price"><span>US$</span><b>29</b><small>one time</small></div>
-        <div><p class="kicker">Continuity license</p><h2 id="license-title">Schedule the archive.<br>Never rent the restore.</h2><p>The free app includes unlimited manual ICS snapshots, every diff, and every restore export. One purchase adds encrypted CalDAV credentials and scheduled capture while the desktop app is open.</p><a class="button primary" href="https://api.sociobot.in/api/v1/products/calendar-ics-snapshots/checkout">Buy the continuity license</a><button class="text-button" id="have-license">Have a license? Verify it</button>
+        <div><p class="kicker">One-time license</p><h2 id="license-title">Schedule CalDAV copies.</h2><p>Free features include manual ICS copies, change review, and restore export. US$29 adds saved CalDAV details and scheduled copies while the app is open.</p><a class="button primary" href="https://api.sociobot.in/api/v1/products/calendar-ics-snapshots/checkout">Buy the US$29 license</a><button class="text-button" id="have-license">Paste a license token</button>
           <form id="license-form" hidden><label for="license-token">License token</label><div><input id="license-token" name="license" autocomplete="off" required><button class="button secondary" type="submit">Verify license</button></div><p id="license-status" role="status" aria-live="polite"></p></form>
         </div>
+      </section>
+      <section class="walkthrough" aria-labelledby="walkthrough-title">
+        <p class="kicker">Sample project walkthrough</p><h2 id="walkthrough-title">See the recovery steps before installing.</h2>
+        <ol><li><img src="/assets/walkthrough-1.svg" width="600" height="360" alt="The sample archive shows two saved calendar editions."><h3>1. Load the sample</h3><p>The sample opens in a separate demo vault.</p></li><li><img src="/assets/walkthrough-2.svg" width="600" height="360" alt="The second sample edition lists a moved planning review and a cancelled airport train."><h3>2. Select a change</h3><p>Choose the earlier event to recover.</p></li><li><img src="/assets/walkthrough-3.svg" width="600" height="360" alt="The app confirms an ICS file has been exported for the selected airport train event."><h3>3. Export an ICS file</h3><p>Import the file into your calendar.</p></li></ol>
       </section>
       <section class="install" aria-labelledby="install-title">
         <p class="kicker">Install from the command line</p><h2 id="install-title">One line, checksum verified.</h2>
@@ -63,7 +73,7 @@
         <p class="notice"><strong>Unsigned preview:</strong> v0.1 installers are not yet notarized or Authenticode-signed. On macOS, right-click the app and choose Open. On Windows, review the SmartScreen prompt before running.</p>
       </section>
     </main>
-    <footer><p>Calendar Snapshotter · An independent local utility from Sociobot</p><nav aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-calendar-ics-snapshots/releases/latest">All releases</a></nav><p class="generated-note">Editorial plate generated for this product; provenance in the source repository.</p></footer>
+    <footer><p>Calendar Snapshotter · Local calendar copies and restore exports</p><nav aria-label="Legal"><a href="/demo/">Demo</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-calendar-ics-snapshots/releases/latest">All releases</a></nav><p class="generated-note">Editorial plate generated for this product; provenance is in the source repository. Built by Param Factory · v0.1.0</p></footer>
     <script type="module" src="/main.ts"></script>
   </body>
 </html>
