@@ -16,6 +16,7 @@ const staticDemoRoute = /^\/demo(?:\/|$)/.test(location.pathname);
 const demoMode = staticDemoRoute || new URLSearchParams(location.search).get("demo") === "1";
 const DEMO_PASSPHRASE = "sample calendar vault";
 
+if (staticDemoRoute) document.querySelector("#main")?.remove();
 if (demoMode) configureVaultStorage("demo:calendar-snapshotter");
 
 const escapeHtml = (value: string) => value.replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]!));
