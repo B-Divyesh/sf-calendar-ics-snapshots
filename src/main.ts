@@ -12,7 +12,8 @@ let selectedSnapshotId = "";
 let selectedChanges = new Set<string>();
 let unlocked = cachedUnlock();
 let scheduler: number | undefined;
-const demoMode = new URLSearchParams(location.search).get("demo") === "1";
+const staticDemoRoute = /^\/demo(?:\/|$)/.test(location.pathname);
+const demoMode = staticDemoRoute || new URLSearchParams(location.search).get("demo") === "1";
 const DEMO_PASSPHRASE = "sample calendar vault";
 
 if (demoMode) configureVaultStorage("demo:calendar-snapshotter");
@@ -32,6 +33,7 @@ captureLicense();
 
 async function start(): Promise<void> {
   if (demoMode) {
+    if (staticDemoRoute) document.title = "Demo — Calendar Snapshotter";
     const exists = await Vault.exists();
     vault = exists ? await Vault.open(DEMO_PASSPHRASE) : await Vault.createWithData(DEMO_PASSPHRASE, await sampleVaultData());
     selectedSnapshotId = vault.data.snapshots.at(-1)?.id || "";
@@ -260,6 +262,10 @@ function bindAppEvents(): void {
     location.reload();
   });
   document.querySelector("#start-real")?.addEventListener("click", () => {
+    if (staticDemoRoute) {
+      location.assign("/");
+      return;
+    }
     const url = new URL(location.href);
     url.searchParams.delete("demo");
     location.assign(url.toString());

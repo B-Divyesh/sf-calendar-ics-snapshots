@@ -59,22 +59,26 @@ test("landing composition remains usable at 390px", async ({ page }) => {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
-test("@claim:sample-project loads the shipped sample in an isolated demo vault", async ({ page }) => {
-  await page.goto("http://127.0.0.1:1420/?demo=1");
+test("@claim:sample-project landing demo action opens the shipped isolated sample instead of the landing page", async ({ page }) => {
+  await page.goto("http://127.0.0.1:4174/");
+  await page.getByRole("link", { name: "Try it with sample data" }).click();
+  await expect(page).toHaveURL(/\/demo\/$/);
   await expect(page.getByText("Demo — sample data, nothing is saved to your archive.")).toBeVisible();
   await expect(page.locator(".snapshot-item")).toHaveCount(2);
   await expect(page.getByText("Northstar studio week").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Calendar Snapshotter" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Keep a recoverable calendar history." })).toHaveCount(0);
 });
 
 test("@claim:calendar-diff shows moved and cancelled events in the sample", async ({ page }) => {
-  await page.goto("http://127.0.0.1:1420/?demo=1");
+  await page.goto("http://127.0.0.1:4174/demo/");
   await expect(page.getByText("Airport train")).toBeVisible();
   await expect(page.locator(".change-kind", { hasText: "cancelled" })).toHaveCount(1);
   await expect(page.locator(".change-kind", { hasText: "moved" })).toHaveCount(1);
 });
 
 test("@claim:ics-restore-export exports the selected sample event as ICS", async ({ page }) => {
-  await page.goto("http://127.0.0.1:1420/?demo=1");
+  await page.goto("http://127.0.0.1:4174/demo/");
   await page.locator(".change-row.cancelled input").check();
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Export 1 event" }).click();
@@ -86,11 +90,11 @@ test("@claim:ics-restore-export exports the selected sample event as ICS", async
 test("@claim:demo-private @claim:no-event-telemetry uses only the demo database and no external requests", async ({ page }) => {
   const requests: string[] = [];
   page.on("request", (request) => requests.push(request.url()));
-  await page.goto("http://127.0.0.1:1420/?demo=1");
+  await page.goto("http://127.0.0.1:4174/demo/");
   const databases = await page.evaluate(async () => (await indexedDB.databases()).map((database) => database.name));
   expect(databases).toContain("demo:calendar-snapshotter");
   expect(databases).not.toContain("calendar-snapshotter");
-  expect(requests.every((url) => new URL(url).origin === "http://127.0.0.1:1420")).toBe(true);
+  expect(requests.every((url) => new URL(url).origin === new URL(page.url()).origin)).toBe(true);
 });
 
 test("@claim:license-price states the one-time US$29 license and free manual restore path", async ({ page }) => {
@@ -136,7 +140,7 @@ test("release download resolution uses only the GitHub API metadata", async ({ p
 
 test("the populated app stays within 390px and keeps archive controls separate", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("http://127.0.0.1:1420/?demo=1");
+  await page.goto("http://127.0.0.1:4174/demo/");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   const heading = await page.locator(".rail-heading").boundingBox();
   const settings = await page.locator("#connection-settings").boundingBox();
@@ -144,7 +148,7 @@ test("the populated app stays within 390px and keeps archive controls separate",
 });
 
 test("the sample archive remains usable after going offline", async ({ page }) => {
-  await page.goto("http://127.0.0.1:1420/?demo=1");
+  await page.goto("http://127.0.0.1:4174/demo/");
   await page.context().setOffline(true);
   await page.locator(".change-row.cancelled input").check();
   const downloadPromise = page.waitForEvent("download");

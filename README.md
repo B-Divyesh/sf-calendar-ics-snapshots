@@ -19,7 +19,7 @@ The free app includes unlimited manual snapshots, diffs, and restore exports. A 
 
 ## Try the sample project
 
-Use the desktop browser entry at `/?demo=1`, or visit [the demo page](https://calendar-ics-snapshots.sociobot.in/demo/). It opens two realistic Northstar studio calendar editions in the separate IndexedDB database `demo:calendar-snapshotter`. The second edition moves a planning review and removes an airport train. The demo banner can reset its own data or return to a real vault without copying anything.
+Use the desktop browser entry at `/?demo=1`, or choose **Try it with sample data** on the [landing page](https://calendar-ics-snapshots.sociobot.in). It opens [the browser demo](https://calendar-ics-snapshots.sociobot.in/demo/) directly in the separate IndexedDB database `demo:calendar-snapshotter`. The second edition moves a planning review and removes an airport train. The demo banner can reset its own data or return to the landing page without copying anything.
 
 ## Install
 

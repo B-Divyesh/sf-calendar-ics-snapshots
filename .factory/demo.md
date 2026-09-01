@@ -1,6 +1,6 @@
 # Demo sandbox
 
-Open `/?demo=1` in the desktop app browser entry point, or visit `/demo/` on the landing site for the walkthrough and launch link.
+Open `/?demo=1` in the desktop app browser entry point, or visit `/demo/` on the landing site. The landing page's **Try it with sample data** action opens `/demo/` directly into the browser-rendered desktop sample.
 
 The desktop sample has two editions of “Northstar studio week.” Edition 002 moves “Planning review” and removes “Airport train.” Select the cancelled event and export it to make a real ICS restore file.
 

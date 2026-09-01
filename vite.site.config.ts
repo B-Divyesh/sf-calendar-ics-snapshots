@@ -1,4 +1,7 @@
 import { defineConfig } from "vite";
+import { fileURLToPath, URL } from "node:url";
+
+const desktopSource = fileURLToPath(new URL("./src", import.meta.url));
 
 export default defineConfig({
   root: "site",
@@ -17,5 +20,11 @@ export default defineConfig({
         notFound: "site/404.html"
       }
     }
+  },
+  server: {
+    fs: { allow: [".."] }
+  },
+  resolve: {
+    alias: { "/src": desktopSource }
   }
 });
