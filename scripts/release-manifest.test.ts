@@ -62,7 +62,11 @@ case "$url" in
   *) cp "$ASSET_PATH" "$target" ;;
 esac
 `);
+    await writeFile(join(bin, "uname"), `#!/bin/sh
+if [ "\${1:-}" = "-s" ]; then echo Linux; else echo x86_64; fi
+`);
     await chmod(join(bin, "curl"), 0o755);
+    await chmod(join(bin, "uname"), 0o755);
     const environment = {
       ...process.env,
       PATH: `${bin}:${process.env.PATH}`,
