@@ -92,17 +92,87 @@
   },
   {
     "id": "scheduled-caldav",
-    "claim": "A US$29 one-time license adds scheduled CalDAV copies while the app is open",
+    "claim": "An existing scheduling license enables scheduled calendar server copies while the app is open",
     "where": "landing license section, Terms page, desktop scheduling dialog, and README",
     "test": "npm run test:e2e -- --grep @claim:scheduled-caldav",
     "sandbox": "fresh browser archive with a fixture valid license; configure a 15-minute schedule, advance the browser clock one scheduler tick, and observe one calendar copy"
   },
   {
     "id": "license-price",
-    "claim": "A one-time scheduling license costs US$29 and manual copies, review, and restore stay free",
-    "where": "landing first screen, license section, Terms page, and README",
+    "claim": "Manual calendar copies, review, archive backup, and restore files remain available without a license",
+    "where": "landing first screen, license section, Terms page, desktop scheduling dialog, and README",
     "test": "npm run test:e2e -- --grep @claim:license-price",
-    "sandbox": "landing page fixture; assert the stated one-time price and free manual path"
+    "sandbox": "landing and desktop fixtures; assert the free features and absence of a checkout action"
+  },
+  {
+    "id": "demo-reset",
+    "claim": "Reset demo restores the two shipped calendar copies without changing a real vault",
+    "where": "demo banner, README, and .factory/demo.md",
+    "test": "npm run test:e2e -- --grep @claim:demo-reset",
+    "sandbox": "fresh browser context with a real-database sentinel; import a third demo copy, reset, and assert the seed and sentinel"
+  },
+  {
+    "id": "archive-roundtrip",
+    "claim": "Exports and imports the full encrypted archive, including calendar copies and saved connection settings",
+    "where": "desktop archive controls and README",
+    "test": "npm run test:e2e -- --grep @claim:archive-roundtrip",
+    "sandbox": "fresh browser vault; export an encrypted archive, replace local state, import it, and assert calendar copies and connection settings return"
+  },
+  {
+    "id": "archive-wrong-passphrase",
+    "claim": "An encrypted archive cannot be imported with the wrong passphrase",
+    "where": "desktop archive import dialog",
+    "test": "npm run test:e2e -- --grep @claim:archive-wrong-passphrase",
+    "sandbox": "fresh browser vault and exported archive; enter a different passphrase and assert the open vault is unchanged"
+  },
+  {
+    "id": "license-token-only",
+    "claim": "License verification sends only the entered license token to Sociobot",
+    "where": "desktop license dialog, Privacy page, and README",
+    "test": "npm run test:e2e -- --grep @claim:license-token-only",
+    "sandbox": "fresh browser app with mocked Sociobot verification; assert the request contains the token and no calendar data"
+  },
+  {
+    "id": "free-accessibility-export",
+    "claim": "Accessibility and calendar export features are available without a license",
+    "where": "desktop app and README",
+    "test": "npm run test:e2e -- --grep @claim:free-accessibility-export",
+    "sandbox": "fresh unlicensed demo; use keyboard controls to select and export a changed event and run Axe"
+  },
+  {
+    "id": "offline-local",
+    "claim": "The open sample archive remains available without a network connection",
+    "where": "desktop offline status",
+    "test": "npm run test:e2e -- --grep @claim:offline-local",
+    "sandbox": "fresh browser context at /demo/; go offline, select a cancelled event, and export its restore file"
+  },
+  {
+    "id": "no-account-import",
+    "claim": "Imports a calendar file without an account",
+    "where": "README",
+    "test": "npm run test:e2e -- --grep @claim:no-account-import",
+    "sandbox": "fresh browser with no cookies or account state; create a vault and import a fixture calendar file"
+  },
+  {
+    "id": "license-sales-paused",
+    "claim": "New scheduling licenses are not currently for sale",
+    "where": "landing first screen, license section, Privacy, Terms, and README",
+    "test": "npm run test:e2e:static -- --grep @claim:license-sales-paused",
+    "sandbox": "built static landing page; assert the sales pause and the absence of any checkout link"
+  },
+  {
+    "id": "mit-license",
+    "claim": "The software source is available under the MIT License",
+    "where": "Terms page and README",
+    "test": "npm test -- -t @claim:mit-license",
+    "sandbox": "repository fixture; assert LICENSE contains the MIT grant and copyright notice"
+  },
+  {
+    "id": "invalid-license-locks-scheduling",
+    "claim": "A license that does not verify does not enable scheduling",
+    "where": "Terms page and desktop license dialog",
+    "test": "npm run test:e2e -- --grep @claim:invalid-license-locks-scheduling",
+    "sandbox": "fresh browser app with mocked invalid Sociobot verification; assert scheduling remains unavailable"
   },
   {
     "id": "checksum-install",

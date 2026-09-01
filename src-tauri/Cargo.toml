@@ -1,7 +1,7 @@
 [package]
 name = "calendar-snapshotter"
-version = "0.1.3"
-description = "Encrypted local version history for calendars"
+version = "0.1.4"
+description = "Encrypted local calendar history"
 authors = ["Sociobot"]
 edition = "2021"
 license = "MIT"

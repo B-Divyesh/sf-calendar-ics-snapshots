@@ -6,18 +6,18 @@ Every visitor-facing sentence and action label on `site/index.html` is under the
 | --- | ---: |
 | Local calendar recovery | 3 |
 | Keep a recoverable calendar history. | 5 |
-| For people whose plans change, it keeps local copies ready to compare and restore. | 14 |
+| For people who rely on changing calendars, it keeps local calendar copies ready to compare and restore. | 16 |
 | Try it with sample data | 5 |
 | Opens a safe sample project. | 5 |
 | View release downloads | 3 |
 | Checking downloads… | 2 |
 | Sample data stays separate from your archive. | 7 |
-| Manual snapshots and restore exports are free. | 7 |
-| One-time scheduling license: US$29. | 4 |
+| Manual calendar copies and restore files are free. | 8 |
+| New scheduling licenses are not currently for sale. | 8 |
 | Local calendar copies make changed appointments easier to recover. | 9 |
 | Local encrypted vault | 3 |
-| Readable changes | 2 |
-| ICS restore export | 3 |
+| Added, moved, and cancelled events | 5 |
+| Calendar restore file (.ics) | 4 |
 | No analytics | 2 |
 | Find what changed in a schedule. | 7 |
 | Meetings move. | 2 |
@@ -26,29 +26,27 @@ Every visitor-facing sentence and action label on `site/index.html` is under the
 | Calendar Snapshotter compares each local copy. | 6 |
 | It marks added, moved, and cancelled events for review. | 9 |
 | Save. Compare. Restore. | 3 |
-| Import an ICS file. | 4 |
-| Optionally schedule CalDAV copies while the app is open. | 9 |
+| Import a calendar file (.ics). | 5 |
+| Existing license holders can schedule copies from a calendar server (CalDAV). | 11 |
 | See added, moved, and cancelled events in a short list. | 11 |
-| Export selected earlier events to an ICS file for import into your calendar. | 14 |
-| Your calendar is not a hosted service. | 8 |
-| Snapshots and saved credentials are encrypted before local storage. | 9 |
+| Export selected earlier events to a calendar restore file (.ics). | 10 |
+| Calendar copies stay in your local vault. | 7 |
+| Calendar copies and saved sign-in details are encrypted before local storage. | 11 |
 | The app has no analytics or third-party calendar processing. | 10 |
-| Restore files use the standard ICS format. | 7 |
+| Restore files use the standard calendar format (.ics). | 8 |
 | Scheduled copies run only while Calendar Snapshotter is open. | 8 |
-| Schedule CalDAV copies. | 3 |
-| Free features include manual ICS copies, change review, and restore export. | 11 |
-| US$29 adds saved CalDAV details and scheduled copies while the app is open. | 13 |
-| Buy the US$29 license | 5 |
-| Paste a license token | 4 |
+| Scheduling sales are paused. | 4 |
+| New licenses are not currently for sale. | 7 |
+| Existing license holders can schedule calendar server copies while the app is open. | 12 |
+| Manual calendar copies, change review, full archive backup, and restore files remain free. | 13 |
+| Enter a license token | 4 |
 | See the recovery steps before installing. | 7 |
 | The sample opens in a separate demo vault. | 8 |
 | Choose the earlier event to recover. | 7 |
 | Import the file into your calendar. | 7 |
 | Install with one command. | 4 |
-| v0.1.3 installers are not yet notarized or Authenticode-signed. | 8 |
-| On macOS, right-click the app and choose Open. | 8 |
-| On Windows, review the SmartScreen prompt before running. | 8 |
-| Calendar Snapshotter · Local calendar copies and restore exports | 8 |
+| v0.1.4 installers are not code-signed. | 5 |
+| Calendar Snapshotter · Local calendar copies and restore files | 8 |
 | Editorial plate generated for this product; provenance is in the source repository. | 11 |
 
 ## Terminology
@@ -57,11 +55,11 @@ Every visitor-facing sentence and action label on `site/index.html` is under the
 | --- | --- |
 | Saved calendar version | calendar copy |
 | Shipped try-out | sample project |
-| Recovery output | ICS restore file |
+| Recovery output | calendar restore file (.ics) |
 | Remote source setup | calendar connection |
 | Encrypted local storage | vault |
-| Paid background capture | scheduled CalDAV copy |
+| Licensed background capture | scheduled calendar server copy |
 
 ## Flags
 
-None. The headline states the job, the next sentence names the intended person, and the first action opens the sample project.
+None. Every sentence is at most 22 words, uses the terminology above, and avoids the banned marketing words.

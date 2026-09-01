@@ -21,7 +21,7 @@ describe("iCalendar core", () => {
     expect(diffCalendars(before, after).map((change) => change.kind).sort()).toEqual(["added", "cancelled", "moved"]);
   });
 
-  it("@claim:recurrence-timezones @claim:ics-restore-export exports the prior form of a moved event with its timezone", () => {
+  it("exports the prior form of a moved event with its timezone", () => {
     const before = calendar(event("a", "20260828T100000", "Review"));
     const after = calendar(event("a", "20260828T120000", "Review"));
     const restored = buildRestoreCalendar(before, diffCalendars(before, after));

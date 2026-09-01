@@ -35,10 +35,10 @@ async function resolveDownload(): Promise<void> {
     const asset = release.assets?.find((item) => patterns[selected].test(item.name));
     if (!asset?.browser_download_url) throw new Error("Platform asset missing");
     button.href = asset.browser_download_url;
-    button.textContent = `Download for ${label}`;
+    button.textContent = `Download for ${label} on GitHub`;
     note.textContent = `${release.tag_name} · checksum published`;
   } catch {
-    button.textContent = "View release downloads";
+    button.textContent = "View releases on GitHub";
     note.textContent = "Downloads are being published. The release page will update soon.";
   }
 }

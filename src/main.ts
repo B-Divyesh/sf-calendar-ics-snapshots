@@ -1,8 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
 import "./styles.css";
 import { buildRestoreCalendar, diffCalendars, mergeCalDavResponse, parseIcs, type CalendarChange } from "./core/ics";
-import { Vault, configureVaultStorage, fingerprint, removeVaultStorage, type Snapshot } from "./core/vault";
-import { cachedUnlock, captureLicense, checkoutUrl, saveLicense, storedLicense, verifyLicense } from "./core/license";
+import { Vault, configureVaultStorage, exportEncryptedArchive, fingerprint, importEncryptedArchive, removeVaultStorage, type Snapshot } from "./core/vault";
+import { cachedUnlock, captureLicense, saveLicense, storedLicense, verifyLicense } from "./core/license";
 import { sampleVaultData } from "./core/sample";
 
 const app = document.querySelector<HTMLDivElement>("#app")!;
@@ -12,6 +12,7 @@ let selectedSnapshotId = "";
 let selectedChanges = new Set<string>();
 let unlocked = cachedUnlock();
 let scheduler: number | undefined;
+let pendingArchiveText = "";
 const staticDemoRoute = /^\/demo(?:\/|$)/.test(location.pathname);
 const demoMode = staticDemoRoute || new URLSearchParams(location.search).get("demo") === "1";
 const DEMO_PASSPHRASE = "sample calendar vault";
@@ -53,8 +54,8 @@ function renderLock(exists: boolean): void {
   app.innerHTML = `
     <main id="main" class="lock-page">
       <header class="masthead compact">
-        <p class="eyebrow">Local continuity desk · Edition 001</p>
-        <h1>Calendar<br>Snapshotter</h1>
+        <p class="eyebrow">Calendar Snapshotter</p>
+        <h1>Protect your<br>calendar history.</h1>
       </header>
       <section class="lock-panel" aria-labelledby="lock-heading">
         <p class="section-number">01 / Vault</p>
@@ -70,7 +71,7 @@ function renderLock(exists: boolean): void {
           <p id="status" class="status" role="status" aria-live="polite"></p>
         </form>
       </section>
-      <footer class="lock-footer">Encrypted local vault · No event telemetry · ICS restore exports</footer>
+      <footer class="lock-footer">Encrypted local vault · No analytics or calendar uploads · Calendar restore files (.ics)</footer>
     </main>`;
   document.querySelector<HTMLFormElement>("#lock-form")!.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -119,11 +120,12 @@ function renderApp(): void {
   const changes = selected ? snapshotChanges(selected) : [];
   selectedChanges = new Set([...selectedChanges].filter((id) => changes.some((change) => change.id === id)));
   app.innerHTML = `
+    ${staticDemoRoute ? `<header class="site-shell-header"><a class="site-wordmark" href="/" aria-label="Calendar Snapshotter home"><span>Calendar</span> Snapshotter</a><nav aria-label="Main navigation"><a href="/">Home</a><a href="/demo/" aria-current="page">Demo</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav></header><p id="route-announcer" class="visually-hidden" role="status" aria-live="polite"></p>` : ""}
     ${demoMode ? `<aside class="demo-banner" aria-label="Demo mode"><strong>Demo — sample data, nothing is saved to your archive.</strong><span><button class="text-button" id="reset-demo">Reset demo</button><button class="text-button" id="start-real">Start for real</button></span></aside>` : ""}
     <header class="app-header">
       <div>
-        <p class="eyebrow">Local continuity desk</p>
-        <h1>Calendar Snapshotter</h1>
+        <p class="eyebrow">Local calendar archive</p>
+        <a class="app-wordmark" href="${staticDemoRoute ? "/" : "#main"}">Calendar Snapshotter</a>
       </div>
       <div class="header-actions">
         <span class="connection-state" id="network-state"><span aria-hidden="true">●</span> ${navigator.onLine ? "On device" : "Offline"}</span>
@@ -131,10 +133,11 @@ function renderApp(): void {
       </div>
     </header>
     <main id="main" class="workspace">
-      <aside class="archive-rail" aria-label="Snapshot archive">
+      <aside class="archive-rail" aria-label="Calendar copy archive">
         <div class="rail-heading"><span>Archive</span><b>${snapshots.length.toString().padStart(2, "0")}</b></div>
-        <button class="button primary full" id="take-snapshot">Take snapshot</button>
-        <input class="visually-hidden" id="ics-file" type="file" accept=".ics,text/calendar" aria-label="Choose ICS file">
+        <button class="button primary full" id="take-snapshot">Save calendar copy</button>
+        <input class="visually-hidden" id="ics-file" type="file" accept=".ics,text/calendar" aria-label="Choose calendar file (.ics)">
+        <input class="visually-hidden" id="archive-file" type="file" accept=".json,application/json" aria-label="Choose encrypted archive file">
         <ol class="snapshot-list">
           ${snapshots.length ? [...snapshots].reverse().map((snapshot, reverseIndex) => {
             const snapshotNumber = snapshots.length - reverseIndex;
@@ -144,31 +147,41 @@ function renderApp(): void {
               <strong>${escapeHtml(snapshot.sourceName)}</strong>
               <time datetime="${snapshot.createdAt}">${dateLabel(snapshot.createdAt)}</time>
             </button></li>`;
-          }).join("") : `<li class="empty-rail">No editions yet</li>`}
+          }).join("") : `<li class="empty-rail">No calendar copies yet</li>`}
         </ol>
-        <button class="text-button settings-link" id="connection-settings">CalDAV schedule</button>
+        <div class="archive-actions"><button class="text-button" id="export-archive">Export encrypted archive</button><button class="text-button" id="import-archive">Import encrypted archive</button></div>
+        <button class="text-button settings-link" id="connection-settings">Calendar server schedule</button>
       </aside>
       <section class="edition" aria-live="polite">
+        <h1 class="workspace-title" tabindex="-1">${demoMode ? "Review changes in the sample calendar." : "Review calendar changes."}</h1>
         ${selected ? renderEdition(selected, changes) : renderEmpty()}
       </section>
     </main>
     <footer class="app-footer">
       <p>Encrypted here. Never uploaded.</p>
       <p id="status" class="status" role="status" aria-live="polite"></p>
-      <button class="text-button" id="license-button">${unlocked ? "Continuity license active" : "Unlock scheduled snapshots"}</button>
+      <button class="text-button" id="license-button">${unlocked ? "Scheduling license active" : "View the scheduling license"}</button>
     </footer>
+    ${staticDemoRoute ? `<footer class="site-shell-footer"><p>Calendar Snapshotter · Local calendar copies and restore files</p><nav aria-label="Footer navigation"><a href="/">Home</a><a href="/demo/">Demo</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-calendar-ics-snapshots" rel="noreferrer">Source on GitHub <span class="visually-hidden">(external)</span></a></nav><p>Built by Param Factory · v0.1.4</p></footer>` : ""}
     <dialog id="settings-dialog" aria-labelledby="settings-title">${renderSettings()}</dialog>
-    <dialog id="license-dialog" aria-labelledby="license-title">${renderLicense()}</dialog>`;
+    <dialog id="license-dialog" aria-labelledby="license-title">${renderLicense()}</dialog>
+    <dialog id="archive-dialog" aria-labelledby="archive-title">${renderArchiveImport()}</dialog>`;
   bindAppEvents();
+  if (staticDemoRoute) requestAnimationFrame(() => {
+    const heading = document.querySelector<HTMLElement>(".workspace-title");
+    heading?.focus();
+    const announcer = document.querySelector<HTMLElement>("#route-announcer");
+    if (announcer) announcer.textContent = heading?.textContent || "Demo";
+  });
 }
 
 function renderEmpty(): string {
   return `<div class="empty-state">
     <p class="section-number">No. 000 / Start here</p>
     <h2>Make the current calendar recoverable.</h2>
-    <p>Import an ICS export now. Each later copy becomes a new encrypted edition, with additions, moves, and cancellations called out.</p>
-    <button class="button primary" data-action="choose-file">Choose an ICS file</button>
-    <p class="field-note">Import an ICS file from your calendar, then keep a local copy ready to compare.</p>
+    <p>Import a calendar file (.ics). Each later calendar copy shows additions, moves, and cancellations.</p>
+    <button class="button primary" data-action="choose-file">Choose a calendar file (.ics)</button>
+    <p class="field-note">Import a calendar file, then keep a local copy ready to compare.</p>
   </div>`;
 }
 
@@ -177,7 +190,7 @@ function renderEdition(snapshot: Snapshot, changes: CalendarChange[]): string {
   return `<article>
     <header class="edition-header">
       <div>
-        <p class="section-number">Snapshot / ${escapeHtml(snapshot.source)}</p>
+        <p class="section-number">Calendar copy / ${escapeHtml(snapshot.source)}</p>
         <h2>${escapeHtml(snapshot.sourceName)}</h2>
         <time datetime="${snapshot.createdAt}">Recorded ${dateLabel(snapshot.createdAt)}</time>
       </div>
@@ -185,8 +198,8 @@ function renderEdition(snapshot: Snapshot, changes: CalendarChange[]): string {
     </header>
     <div class="change-strip" aria-label="Change summary">${counts(changes)}</div>
     <div class="edition-tools">
-      <h3>Change desk</h3>
-      <p>${changes.length ? "Select the earlier event forms you want to recover." : "No schedule changes from the preceding edition."}</p>
+      <h3>Changes in this copy</h3>
+      <p>${changes.length ? "Select the earlier events you want to recover." : "No schedule changes from the preceding calendar copy."}</p>
       <button class="button secondary" id="export-selected" ${selectedChanges.size ? "" : "disabled"}>Export ${selectedChanges.size || "selected"} event${selectedChanges.size === 1 ? "" : "s"}</button>
     </div>
     ${changes.length ? `<ul class="change-list">${changes.map((change) => `
@@ -197,40 +210,51 @@ function renderEdition(snapshot: Snapshot, changes: CalendarChange[]): string {
           <span class="change-kind">${change.kind}</span>
           <span class="change-copy"><strong>${escapeHtml(change.title)}</strong><small>${escapeHtml(change.detail)}</small></span>
         </label>
-      </li>`).join("")}</ul>` : `<div class="no-changes"><span aria-hidden="true">✓</span><p><strong>This edition matches the last one.</strong><br>It is still a complete encrypted recovery point.</p></div>`}
+      </li>`).join("")}</ul>` : `<div class="no-changes"><span aria-hidden="true">✓</span><p><strong>This calendar copy matches the last one.</strong><br>It remains a complete encrypted recovery point.</p></div>`}
   </article>`;
 }
 
 function renderSettings(): string {
   const connection = vault?.data.connection;
   return `<form method="dialog" id="connection-form">
-    <div class="dialog-top"><p class="section-number">Automation desk</p><button class="icon-button" type="button" data-close-settings aria-label="Close settings">×</button></div>
-    <h2 id="settings-title">Scheduled CalDAV snapshots</h2>
-    ${unlocked ? `<p>Snapshot a calendar collection while this desktop app is running. Credentials are held inside your encrypted vault.</p>
-      <label for="caldav-url">Calendar or ICS URL</label><input id="caldav-url" name="url" type="url" value="${escapeHtml(connection?.url || "")}" required>
+    <div class="dialog-top"><p class="section-number">Schedule settings</p><button class="icon-button" type="button" data-close-settings aria-label="Close settings">×</button></div>
+    <h2 id="settings-title">Scheduled calendar server copies</h2>
+    ${unlocked ? `<p>Save copies from a calendar server (CalDAV) while this desktop app is running. Sign-in details stay inside your encrypted vault.</p>
+      <label for="caldav-url">Calendar file or server URL</label><input id="caldav-url" name="url" type="url" value="${escapeHtml(connection?.url || "")}" required>
       <label for="caldav-user">Username</label><input id="caldav-user" name="username" autocomplete="username" value="${escapeHtml(connection?.username || "")}">
       <label for="caldav-password">App password</label><input id="caldav-password" name="password" type="password" autocomplete="current-password" value="${escapeHtml(connection?.password || "")}">
       <label for="schedule">Frequency</label><select id="schedule" name="schedule">
         ${[["manual", "Only when I ask"], ["15m", "Every 15 minutes"], ["hourly", "Every hour"], ["daily", "Every day"]].map(([value, label]) => `<option value="${value}" ${connection?.schedule === value ? "selected" : ""}>${label}</option>`).join("")}
       </select>
       <p class="field-note">Runs while Calendar Snapshotter is open. Use a provider app password when available.</p>
-      <div class="dialog-actions"><button class="button primary" type="submit">Save connection</button><button class="button secondary" type="button" id="run-connection">Snapshot now</button></div>`
-      : `<div class="paywall-note"><span class="edition-count"><b>∞</b><span>editions</span></span><p>Automated CalDAV capture is included in the US$29 one-time continuity license. Manual ICS snapshots, diffs, and restores remain free.</p><button type="button" class="button primary" data-open-license>See the one-time license</button></div>`}
+      <div class="dialog-actions"><button class="button primary" type="submit">Save connection</button><button class="button secondary" type="button" id="run-connection">Save a copy now</button></div>`
+      : `<div class="paywall-note"><span class="edition-count"><b>∞</b><span>copies</span></span><p>A scheduling license adds automatic copies from a calendar server (CalDAV). Manual calendar copies, review, archive backup, and restore files stay free.</p><button type="button" class="button primary" data-open-license>View the scheduling license</button></div>`}
     <p id="dialog-status" class="status" role="status" aria-live="polite"></p>
   </form>`;
 }
 
 function renderLicense(): string {
   return `<div>
-    <div class="dialog-top"><p class="section-number">Continuity license</p><button class="icon-button" data-close-license aria-label="Close license">×</button></div>
-    <h2 id="license-title">Own the automation.<br>No subscription.</h2>
-    <p><strong>US$29 one time</strong> unlocks scheduled CalDAV snapshots on this device. Manual encrypted snapshots, diffs, and all restore exports are free forever.</p>
-    <a class="button primary" href="${checkoutUrl}" target="_blank" rel="noreferrer">Buy continuity license</a>
-    <form id="restore-license"><label for="license-token">Have a license? Paste it here</label><input id="license-token" name="license" value="${escapeHtml(storedLicense())}" autocomplete="off" required><button class="button secondary" type="submit">Verify license</button></form>
-    <p class="field-note">Sociobot/Dodo is the merchant of record. Refunds are handled there and revoke the license.</p>
+    <div class="dialog-top"><p class="section-number">Scheduling license</p><button class="icon-button" data-close-license aria-label="Close license">×</button></div>
+    <h2 id="license-title">Scheduling for existing license holders</h2>
+    <p>New scheduling licenses are not currently for sale. Manual calendar copies, change review, archive backup, and restore files remain available without a license.</p>
+    <form id="restore-license"><label for="license-token">Enter an existing license token</label><input id="license-token" name="license" value="${escapeHtml(storedLicense())}" autocomplete="off" required><button class="button secondary" type="submit">Verify license</button></form>
+    <p class="field-note">Verification sends only this token to Sociobot. Calendar data stays on this device.</p>
     <p id="license-status" class="status" role="status" aria-live="polite">${unlocked ? "License active on this device." : ""}</p>
-    <p class="legal-links"><a href="https://calendar-ics-snapshots.sociobot.in/privacy" target="_blank">Privacy</a> · <a href="https://calendar-ics-snapshots.sociobot.in/terms" target="_blank">Terms</a></p>
+    <p class="legal-links"><a href="https://calendar-ics-snapshots.sociobot.in/privacy" target="_blank" rel="noreferrer">Privacy <span class="visually-hidden">(opens website)</span></a> · <a href="https://calendar-ics-snapshots.sociobot.in/terms" target="_blank" rel="noreferrer">Terms <span class="visually-hidden">(opens website)</span></a></p>
   </div>`;
+}
+
+function renderArchiveImport(): string {
+  return `<form id="archive-import-form">
+    <div class="dialog-top"><p class="section-number">Encrypted archive</p><button class="icon-button" type="button" data-close-archive aria-label="Close archive import">×</button></div>
+    <h2 id="archive-title">Import your full archive</h2>
+    <p>This replaces the open vault with the imported calendar copies and saved connection. Enter the passphrase used to encrypt the backup.</p>
+    <p id="archive-file-name" class="field-note"></p>
+    <label for="archive-passphrase">Archive passphrase</label><input id="archive-passphrase" name="passphrase" type="password" minlength="10" autocomplete="current-password" required>
+    <div class="dialog-actions"><button class="button primary" type="submit">Import encrypted archive</button><button class="button secondary" type="button" data-close-archive>Cancel</button></div>
+    <p id="archive-status" class="status" role="status" aria-live="polite"></p>
+  </form>`;
 }
 
 function bindAppEvents(): void {
@@ -249,18 +273,30 @@ function bindAppEvents(): void {
     exportButton.textContent = `Export ${selectedChanges.size || "selected"} event${selectedChanges.size === 1 ? "" : "s"}`;
   }));
   document.querySelector("#export-selected")?.addEventListener("click", exportSelected);
+  document.querySelector("#export-archive")?.addEventListener("click", exportArchive);
+  document.querySelector("#import-archive")?.addEventListener("click", () => document.querySelector<HTMLInputElement>("#archive-file")?.click());
+  document.querySelector<HTMLInputElement>("#archive-file")?.addEventListener("change", prepareArchiveImport);
   document.querySelector("#lock-vault")?.addEventListener("click", async () => { vault = undefined; window.clearInterval(scheduler); renderLock(true); });
   document.querySelector("#connection-settings")?.addEventListener("click", () => document.querySelector<HTMLDialogElement>("#settings-dialog")!.showModal());
   document.querySelector("[data-close-settings]")?.addEventListener("click", () => document.querySelector<HTMLDialogElement>("#settings-dialog")!.close());
   document.querySelector("#license-button")?.addEventListener("click", () => document.querySelector<HTMLDialogElement>("#license-dialog")!.showModal());
   document.querySelector("[data-open-license]")?.addEventListener("click", () => { document.querySelector<HTMLDialogElement>("#settings-dialog")!.close(); document.querySelector<HTMLDialogElement>("#license-dialog")!.showModal(); });
   document.querySelector("[data-close-license]")?.addEventListener("click", () => document.querySelector<HTMLDialogElement>("#license-dialog")!.close());
+  document.querySelectorAll("[data-close-archive]").forEach((button) => button.addEventListener("click", () => document.querySelector<HTMLDialogElement>("#archive-dialog")!.close()));
   document.querySelector<HTMLFormElement>("#connection-form")?.addEventListener("submit", saveConnection);
   document.querySelector("#run-connection")?.addEventListener("click", () => runConnection(true));
   document.querySelector<HTMLFormElement>("#restore-license")?.addEventListener("submit", restoreLicense);
+  document.querySelector<HTMLFormElement>("#archive-import-form")?.addEventListener("submit", finishArchiveImport);
   document.querySelector("#reset-demo")?.addEventListener("click", async () => {
-    await removeVaultStorage();
-    location.reload();
+    try {
+      vault = undefined;
+      await removeVaultStorage();
+      location.reload();
+    } catch (error) {
+      vault = await Vault.open(DEMO_PASSPHRASE);
+      renderApp();
+      announce(error instanceof Error ? error.message : "The sample could not be reset.", true);
+    }
   });
   document.querySelector("#start-real")?.addEventListener("click", () => {
     if (staticDemoRoute) {
@@ -271,6 +307,56 @@ function bindAppEvents(): void {
     url.searchParams.delete("demo");
     location.assign(url.toString());
   });
+}
+
+async function exportArchive(): Promise<void> {
+  try {
+    const output = await exportEncryptedArchive();
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(new Blob([output], { type: "application/json" }));
+    link.download = `calendar-snapshotter-archive-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    announce("Exported the full encrypted archive.");
+  } catch (error) {
+    announce(error instanceof Error ? error.message : "The encrypted archive could not be exported.", true);
+  }
+}
+
+async function prepareArchiveImport(event: Event): Promise<void> {
+  const input = event.currentTarget as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+  pendingArchiveText = await file.text();
+  const dialog = document.querySelector<HTMLDialogElement>("#archive-dialog")!;
+  dialog.querySelector<HTMLElement>("#archive-file-name")!.textContent = `Selected: ${file.name}`;
+  dialog.showModal();
+  dialog.querySelector<HTMLInputElement>("#archive-passphrase")?.focus();
+  input.value = "";
+}
+
+async function finishArchiveImport(event: SubmitEvent): Promise<void> {
+  event.preventDefault();
+  const form = event.currentTarget as HTMLFormElement;
+  const status = form.querySelector<HTMLElement>("#archive-status")!;
+  const button = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
+  button.disabled = true;
+  status.textContent = "Checking and importing the encrypted archive…";
+  status.dataset.kind = "ok";
+  try {
+    const passphrase = String(new FormData(form).get("passphrase") || "");
+    vault = await importEncryptedArchive(passphrase, pendingArchiveText);
+    selectedSnapshotId = vault.data.snapshots.at(-1)?.id || "";
+    selectedChanges.clear();
+    pendingArchiveText = "";
+    document.querySelector<HTMLDialogElement>("#archive-dialog")?.close();
+    renderApp();
+    announce("Imported the full encrypted archive.");
+  } catch (error) {
+    status.textContent = error instanceof Error ? error.message : "The encrypted archive could not be imported.";
+    status.dataset.kind = "error";
+    button.disabled = false;
+  }
 }
 
 function chooseFile(): void { document.querySelector<HTMLInputElement>("#ics-file")?.click(); }
@@ -291,7 +377,7 @@ async function addSnapshot(ics: string, source: Snapshot["source"], sourceName: 
   if (!vault) return false;
   const digest = await fingerprint(ics);
   if (vault.data.snapshots.at(-1)?.fingerprint === digest) {
-    announce("No calendar changes. The latest encrypted edition is already current.");
+    announce("No calendar changes. The latest encrypted calendar copy is already current.");
     return false;
   }
   const snapshot: Snapshot = { id: crypto.randomUUID(), createdAt: new Date().toISOString(), source, sourceName, ics, fingerprint: digest };
@@ -300,7 +386,7 @@ async function addSnapshot(ics: string, source: Snapshot["source"], sourceName: 
   selectedSnapshotId = snapshot.id;
   selectedChanges.clear();
   renderApp();
-  announce(`Snapshot recorded with ${parseIcs(ics).events.length} events.`);
+  announce(`Calendar copy saved with ${parseIcs(ics).events.length} events.`);
   return true;
 }
 
@@ -333,11 +419,11 @@ async function saveConnection(event: SubmitEvent): Promise<void> {
   await vault.save();
   startScheduler();
   document.querySelector<HTMLDialogElement>("#settings-dialog")?.close();
-  announce("Encrypted CalDAV connection saved.");
+  announce("Encrypted calendar server connection saved.");
 }
 
 async function fetchCalendar(): Promise<string> {
-  if (!vault?.data.connection) throw new Error("Save a CalDAV connection first.");
+  if (!vault?.data.connection) throw new Error("Save a calendar server connection first.");
   const { url, username, password } = vault.data.connection;
   if (isTauri) return mergeCalDavResponse(await invoke<string>("fetch_calendar", { url, username, password }));
   const response = await fetch(url, { headers: username ? { Authorization: `Basic ${btoa(`${username}:${password}`)}` } : {} });
@@ -353,7 +439,7 @@ async function runConnection(manual = false): Promise<void> {
     const ics = await fetchCalendar();
     const name = parseIcs(ics).name;
     vault.data.connection.lastRun = new Date().toISOString();
-    await addSnapshot(ics, "caldav", name === "Imported calendar" ? "CalDAV calendar" : name);
+    await addSnapshot(ics, "caldav", name === "Imported calendar" ? "Calendar server" : name);
     await vault.save();
     if (manual) document.querySelector<HTMLDialogElement>("#settings-dialog")?.close();
   } catch (error) {
@@ -381,7 +467,7 @@ async function restoreLicense(event: SubmitEvent): Promise<void> {
   status.textContent = "Checking license…";
   const verdict = await verifyLicense(true);
   unlocked = verdict.valid;
-  status.textContent = verdict.valid ? "License active. Scheduled snapshots are unlocked." : verdict.reason === "offline" ? "Could not reach the license service. Try again when online." : "That license is not active for Calendar Snapshotter.";
+  status.textContent = verdict.valid ? "License active. Scheduled calendar copies are available." : verdict.reason === "offline" ? "Could not reach the license service. Try again when online." : "That license is not active for Calendar Snapshotter.";
   status.dataset.kind = verdict.valid ? "ok" : "error";
   if (verdict.valid) startScheduler();
 }

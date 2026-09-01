@@ -1,0 +1,1 @@
+Keep encrypted calendar copies, compare schedule changes, and restore lost events.
