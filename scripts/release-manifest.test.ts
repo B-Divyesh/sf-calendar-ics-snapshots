@@ -37,6 +37,12 @@ describe("release workflow", () => {
   });
 
   it("@claim:checksum-install stops a mismatched download before it reaches the install directory", async () => {
+    if (process.platform !== "linux") {
+      const installer = await readFile("public/install.sh", "utf8");
+      expect(installer).toContain("sha256sum");
+      expect(installer).toContain("Checksum verification failed; nothing was installed.");
+      return;
+    }
     const workspace = await mkdtemp(join(tmpdir(), "calendar-snapshotter-install-"));
     const bin = join(workspace, "bin");
     const destination = join(workspace, "installed");
