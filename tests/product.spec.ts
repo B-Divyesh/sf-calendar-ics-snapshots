@@ -58,12 +58,15 @@ test("landing composition remains usable at 390px", async ({ page }) => {
   await expect(page.getByText("For people who rely on changing calendars")).toBeVisible();
   const action = page.getByRole("link", { name: "Try it with sample data" });
   const outcome = page.getByText("Opens a safe sample project.");
+  const facts = page.locator(".plain-facts li");
   await expect(action).toBeVisible();
   await expect(outcome).toBeVisible();
+  await expect(facts).toHaveCount(3);
   await expect(page.getByText("New scheduling licenses are not currently for sale.")).toBeVisible();
-  const [actionBox, outcomeBox] = await Promise.all([action.boundingBox(), outcome.boundingBox()]);
+  const [actionBox, outcomeBox, lastFactBox] = await Promise.all([action.boundingBox(), outcome.boundingBox(), facts.last().boundingBox()]);
   expect(actionBox && actionBox.y + actionBox.height).toBeLessThanOrEqual(844);
   expect(outcomeBox && outcomeBox.y + outcomeBox.height).toBeLessThanOrEqual(844);
+  expect(lastFactBox && lastFactBox.y + lastFactBox.height).toBeLessThanOrEqual(844);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
@@ -356,6 +359,7 @@ test("@claim:release-downloads resolves the platform download from GitHub API me
     assets: [{ name: "Calendar-Snapshotter_0.1.1_amd64.AppImage", browser_download_url: "https://github.com/B-Divyesh/sf-calendar-ics-snapshots/releases/download/v0.1.1/Calendar-Snapshotter_0.1.1_amd64.AppImage" }]
   } }));
   await page.goto("http://127.0.0.1:4174/");
+  await page.getByRole("button", { name: "Check for a newer release" }).click();
   await expect(page.locator("#download-button")).toHaveAttribute("href", /Calendar-Snapshotter_0\.1\.1_amd64\.AppImage$/);
   expect(requests.some((url) => /latest\.json/.test(url))).toBe(false);
   expect(consoleErrors).toEqual([]);
@@ -419,8 +423,9 @@ test("an unavailable release has a calm download state without a console error",
   page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
   await page.route("https://api.github.com/repos/B-Divyesh/sf-calendar-ics-snapshots/releases/latest", (route) => route.fulfill({ json: { tag_name: "v0.1.1", assets: [] } }));
   await page.goto("http://127.0.0.1:4174/");
-  await expect(page.locator("#download-button")).toContainText("View releases on GitHub");
-  await expect(page.locator("#platform-note")).toContainText("Downloads are being published");
+  await page.getByRole("button", { name: "Check for a newer release" }).click();
+  await expect(page.locator("#download-button")).toContainText("Download for Linux on GitHub");
+  await expect(page.locator("#platform-note")).toContainText("latest check was unavailable");
   expect(errors).toEqual([]);
 });
 

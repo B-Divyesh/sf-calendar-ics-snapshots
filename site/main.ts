@@ -9,6 +9,15 @@ const LICENSE_KEY = "sb_license:calendar-ics-snapshots";
 const VERDICT_KEY = `${LICENSE_KEY}:verdict`;
 type Platform = "macos_arm64" | "macos_x64" | "windows" | "linux";
 type Release = { tag_name: string; assets?: { name: string; browser_download_url: string }[] };
+const BUNDLED_RELEASE: Release = {
+  tag_name: "v0.1.4",
+  assets: [
+    "Calendar.Snapshotter_0.1.4_aarch64.dmg",
+    "Calendar.Snapshotter_0.1.4_x64.dmg",
+    "Calendar.Snapshotter_0.1.4_x64-setup.exe",
+    "Calendar.Snapshotter_0.1.4_amd64.AppImage"
+  ].map((name) => ({ name, browser_download_url: `https://github.com/${REPO}/releases/download/v0.1.4/${name}` }))
+};
 
 function platform(): Platform {
   const hint = (navigator as Navigator & { userAgentData?: { platform: string } }).userAgentData?.platform || navigator.platform || navigator.userAgent;
@@ -17,11 +26,29 @@ function platform(): Platform {
   return "linux";
 }
 
-async function resolveDownload(): Promise<void> {
+function applyRelease(release: Release): boolean {
   const button = document.querySelector<HTMLAnchorElement>("#download-button")!;
   const note = document.querySelector<HTMLElement>("#platform-note")!;
   const selected = platform();
   const label = selected.startsWith("macos") ? "macOS" : selected === "windows" ? "Windows" : "Linux";
+  const patterns: Record<Platform, RegExp> = {
+    macos_arm64: /(aarch64|arm64).*\.dmg$/i,
+    macos_x64: /(x64|x86_64).*\.dmg$/i,
+    windows: /(setup.*\.exe|\.msi)$/i,
+    linux: /\.AppImage$/i
+  };
+  const asset = release.assets?.find((item) => patterns[selected].test(item.name));
+  if (!asset?.browser_download_url) return false;
+  button.href = asset.browser_download_url;
+  button.textContent = `Download for ${label} on GitHub`;
+  note.textContent = `${release.tag_name} · checksum published`;
+  return true;
+}
+
+async function resolveDownload(refresh = false): Promise<void> {
+  const note = document.querySelector<HTMLElement>("#platform-note")!;
+  applyRelease(BUNDLED_RELEASE);
+  if (!refresh) return;
   try {
     const cacheKey = "calendar-snapshotter:release:v1";
     const cached = JSON.parse(localStorage.getItem(cacheKey) || "null") as { savedAt: number; release: Release } | null;
@@ -29,20 +56,10 @@ async function resolveDownload(): Promise<void> {
     if (releaseResponse && !releaseResponse.ok) throw new Error("No published release");
     const release = cached && !releaseResponse ? cached.release : await releaseResponse!.json() as Release;
     if (releaseResponse) localStorage.setItem(cacheKey, JSON.stringify({ savedAt: Date.now(), release }));
-    const patterns: Record<Platform, RegExp> = {
-      macos_arm64: /(aarch64|arm64).*\.dmg$/i,
-      macos_x64: /(x64|x86_64).*\.dmg$/i,
-      windows: /(setup.*\.exe|\.msi)$/i,
-      linux: /\.AppImage$/i
-    };
-    const asset = release.assets?.find((item) => patterns[selected].test(item.name));
-    if (!asset?.browser_download_url) throw new Error("Platform asset missing");
-    button.href = asset.browser_download_url;
-    button.textContent = `Download for ${label} on GitHub`;
-    note.textContent = `${release.tag_name} · checksum published`;
+    if (!applyRelease(release)) throw new Error("Platform asset missing");
   } catch {
-    button.textContent = "View releases on GitHub";
-    note.textContent = "Downloads are being published. The release page will update soon.";
+    applyRelease(BUNDLED_RELEASE);
+    note.textContent = "The latest check was unavailable. The published v0.1.4 download is ready.";
   }
 }
 
@@ -87,6 +104,7 @@ if (form && field) {
   });
 }
 if (!queryDemo && document.querySelector("#download-button")) void resolveDownload();
+document.querySelector("#refresh-download")?.addEventListener("click", () => void resolveDownload(true));
 
 document.querySelector("#reset-demo")?.addEventListener("click", async () => {
   const status = document.querySelector<HTMLElement>("#demo-status");

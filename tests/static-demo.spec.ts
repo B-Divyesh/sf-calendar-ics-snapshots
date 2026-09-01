@@ -78,3 +78,33 @@ test("@claim:license-sales-paused sales pause is explicit and no public route ex
   await expect(page.getByRole("heading", { name: "Scheduling sales are paused." })).toBeVisible();
   await expect(page.locator('a[href*="/checkout"]')).toHaveCount(0);
 });
+
+test("public wording uses one calendar-copy term, literal labels, and identified external links", async ({ page }) => {
+  const forbidden = [
+    "Local continuity desk",
+    "Change desk",
+    "Readable changes",
+    "Your calendar is not a hosted service",
+    "Paste a license token",
+    "Unlock scheduled snapshots",
+    "Buy the US$29 license",
+    "No event telemetry",
+    "ICS restore export",
+    "notarized",
+    "Authenticode-signed"
+  ];
+
+  for (const route of ["/", "/demo/", "/privacy/", "/terms/"]) {
+    await page.goto(`http://127.0.0.1:4175${route}`);
+    const text = await page.locator("body").innerText();
+    for (const phrase of forbidden) expect(text).not.toContain(phrase);
+    for (const link of await page.locator('a[href^="http"]').all()) {
+      await expect(link).toContainText(/GitHub|Sociobot|external|opens website/);
+    }
+  }
+
+  await page.goto("http://127.0.0.1:4175/demo/");
+  await expect(page.getByText("Local calendar archive")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Changes in this copy" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "View the scheduling license" })).toBeVisible();
+});

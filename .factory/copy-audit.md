@@ -15,9 +15,12 @@ This table records every visible landing-page line. Counts split on spaces. No l
 | Sample data stays separate from your archive. | 7 | — |
 | Manual calendar copies and restore files are free. | 8 | — |
 | New scheduling licenses are not currently for sale. | 8 | — |
-| View releases on GitHub | 4 | — |
-| Downloads are being published. | 4 | — |
-| The release page will update soon. | 6 | — |
+| Download for Linux / Windows / macOS on GitHub | 6 each | — |
+| v0.1.4 · checksum published | 4 | — |
+| Published download ready. | 3 | — |
+| Check for a newer release | 5 | — |
+| The latest check was unavailable. | 5 | — |
+| The published v0.1.4 download is ready. | 6 | — |
 | Local calendar copies make changed appointments easier to recover. | 9 | — |
 | Local encrypted vault | 3 | — |
 | Added, moved, and cancelled events | 5 | — |

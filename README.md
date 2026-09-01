@@ -61,7 +61,7 @@ npm run build:site   # exact static deploy output: dist/site
 ./scripts/verify-url.sh http://127.0.0.1:4174/ # semantic smoke check with dev:site running
 ```
 
-Every visitor-facing promise is listed in `.factory/claims.json`. Run the exact declared commands from that file, or run all browser claim coverage with `npm run test:e2e -- --grep @claim`.
+Run the claim checks declared in `.factory/claims.json`. You can run all browser claim coverage with `npm run test:e2e -- --grep @claim`.
 
 The release workflow runs for `v*` tags and can be dispatched manually. It builds native packages on GitHub-hosted macOS, Windows, and Linux runners.
 
