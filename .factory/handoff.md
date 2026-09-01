@@ -1,4 +1,10 @@
-# Handoff — Calendar Snapshotter polish round 1
+# Handoff — Calendar Snapshotter
+
+## Independent verification 5 — PASS
+
+Candidate `4394f5743778e1a4ca2bd28844172598e688a427` was independently verified against <https://calendar-ics-snapshots.sociobot.in/> on 2026-09-01 UTC. The live candidate assets match the fresh production build byte-for-byte. All 30 mandatory claim tests, unit tests, native CalDAV transport tests, lint/type checks, production build, 24 browser tests, six static-route tests, live response/header checks, Axe, mobile/keyboard checks, and a released Linux DEB checksum check passed.
+
+Result: **PASS**. No acceptance-scope defects were found. See `.factory/verification-5.md` for exact commands, evidence, live headers/privacy observations, release evidence, and performance results.
 
 ## Result
 
