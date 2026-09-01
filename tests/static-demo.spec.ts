@@ -66,6 +66,11 @@ test("public routes share navigation, legal links, one task heading, and route f
   await expect(page).toHaveTitle("Calendar Snapshotter — recover calendar changes");
   await expect(page.getByRole("heading", { level: 1 })).toBeFocused();
   expect(await page.evaluate(() => scrollY)).toBeGreaterThanOrEqual(previousScroll - 2);
+
+  await page.goto("http://127.0.0.1:4175/demo/");
+  await page.locator("footer").getByRole("link", { name: "Terms" }).click();
+  await expect(page).toHaveTitle("Terms — Calendar Snapshotter");
+  await expect(page.getByRole("heading", { level: 1 })).toBeFocused();
 });
 
 test("@claim:license-sales-paused sales pause is explicit and no public route exposes the dead checkout", async ({ page }) => {

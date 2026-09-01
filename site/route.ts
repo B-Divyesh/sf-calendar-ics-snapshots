@@ -9,9 +9,12 @@ function focusRouteHeading(): void {
   if (announcer) announcer.textContent = heading.textContent?.trim() || document.title;
 }
 
-document.querySelectorAll<HTMLAnchorElement>('a[href^="/"]').forEach((link) => link.addEventListener("click", () => {
-  sessionStorage.setItem(ROUTE_FOCUS_KEY, "1");
-}));
+document.addEventListener("click", (event) => {
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+  const link = target.closest<HTMLAnchorElement>('a[href^="/"]');
+  if (link) sessionStorage.setItem(ROUTE_FOCUS_KEY, "1");
+});
 
 if (sessionStorage.getItem(ROUTE_FOCUS_KEY) === "1") {
   sessionStorage.removeItem(ROUTE_FOCUS_KEY);
