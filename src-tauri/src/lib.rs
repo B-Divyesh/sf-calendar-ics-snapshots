@@ -7,19 +7,24 @@ const REPORT_BODY: &str = r#"<?xml version="1.0" encoding="utf-8" ?>
   <c:filter><c:comp-filter name="VCALENDAR"><c:comp-filter name="VEVENT"/></c:comp-filter></c:filter>
 </c:calendar-query>"#;
 
-#[tauri::command]
-async fn fetch_calendar(url: String, username: String, password: String) -> Result<String, String> {
-    let parsed = url::Url::parse(&url).map_err(|_| "Enter a valid calendar URL.".to_string())?;
+fn calendar_request(url: &str) -> Result<(url::Url, Method, bool), String> {
+    let parsed = url::Url::parse(url).map_err(|_| "Enter a valid calendar URL.".to_string())?;
     if parsed.scheme() != "https" && parsed.scheme() != "http" {
         return Err("Calendar URLs must use HTTPS or HTTP.".into());
     }
+    let is_ics = parsed.path().to_ascii_lowercase().ends_with(".ics");
+    let method = if is_ics { Method::GET } else { Method::from_bytes(b"REPORT").unwrap() };
+    Ok((parsed, method, is_ics))
+}
+
+#[tauri::command]
+async fn fetch_calendar(url: String, username: String, password: String) -> Result<String, String> {
+    let (parsed, method, is_ics) = calendar_request(&url)?;
     let client = Client::builder()
         .timeout(Duration::from_secs(30))
         .redirect(reqwest::redirect::Policy::limited(5))
         .build()
         .map_err(|_| "Could not prepare the secure connection.".to_string())?;
-    let is_ics = parsed.path().to_ascii_lowercase().ends_with(".ics");
-    let method = if is_ics { Method::GET } else { Method::from_bytes(b"REPORT").unwrap() };
     let mut request = client.request(method, parsed).header("User-Agent", "Calendar-Snapshotter/0.1");
     if !username.is_empty() {
         request = request.basic_auth(username, Some(password));
@@ -39,6 +44,32 @@ async fn fetch_calendar(url: String, username: String, password: String) -> Resu
         return Err("Calendar response is larger than the 20 MB safety limit.".into());
     }
     response.text().await.map_err(|_| "Calendar data was not valid text.".to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[doc = "@claim:native-caldav-transport"]
+    fn native_caldav_transport_uses_get_for_direct_ics() {
+        let (url, method, is_ics) = calendar_request("https://calendar.example/team.ics").unwrap();
+        assert_eq!(url.as_str(), "https://calendar.example/team.ics");
+        assert_eq!(method, Method::GET);
+        assert!(is_ics);
+    }
+
+    #[test]
+    fn native_caldav_transport_uses_report_for_calendar_collections() {
+        let (_, method, is_ics) = calendar_request("https://calendar.example/dav/team/").unwrap();
+        assert_eq!(method.as_str(), "REPORT");
+        assert!(!is_ics);
+    }
+
+    #[test]
+    fn native_caldav_transport_rejects_other_url_schemes() {
+        assert_eq!(calendar_request("file:///private/calendar.ics"), Err("Calendar URLs must use HTTPS or HTTP.".into()));
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

@@ -1,51 +1,142 @@
 [
   {
+    "id": "calendar-recovery",
+    "claim": "Keeps local calendar copies ready to compare and restore",
+    "where": "landing headline and README",
+    "test": "npm run test:e2e -- --grep @claim:calendar-recovery",
+    "sandbox": "fresh browser archive; import two changed ICS copies, select a deleted event, and download its restore file"
+  },
+  {
     "id": "sample-project",
     "claim": "Try the app with an isolated sample calendar project",
     "where": "landing first screen, demo page, desktop first-run screen",
     "test": "npm run test:e2e -- --grep @claim:sample-project",
-    "sandbox": "fresh browser context at /?demo=1; assert two sample editions and the persistent demo banner"
+    "sandbox": "fresh browser context at /demo/; assert two sample editions and the persistent demo banner"
   },
   {
     "id": "calendar-diff",
     "claim": "Shows moved and cancelled events between calendar copies",
-    "where": "landing How it works, desktop sample project",
+    "where": "landing How it works and desktop sample project",
     "test": "npm run test:e2e -- --grep @claim:calendar-diff",
-    "sandbox": "fresh browser context at /?demo=1; inspect the shipped sample edition"
+    "sandbox": "fresh browser context at /demo/; inspect the shipped sample edition"
   },
   {
     "id": "ics-restore-export",
-    "claim": "Exports selected earlier events to an ICS file",
-    "where": "landing How it works, desktop sample project",
+    "claim": "Exports selected earlier events as a standard ICS restore file",
+    "where": "landing How it works, desktop sample project, and README",
     "test": "npm run test:e2e -- --grep @claim:ics-restore-export",
-    "sandbox": "fresh browser context at /?demo=1; select the cancelled sample event and inspect the downloaded ICS"
+    "sandbox": "fresh browser context at /demo/; download the cancelled sample event and inspect VCALENDAR, VERSION, VTIMEZONE, and event data"
   },
   {
     "id": "demo-private",
     "claim": "Sample data stays separate from your archive",
-    "where": "landing first screen, demo page, desktop demo banner",
+    "where": "landing first screen, demo page, desktop demo banner, and README",
     "test": "npm run test:e2e -- --grep @claim:demo-private",
-    "sandbox": "fresh browser context at /?demo=1; record requests and IndexedDB database names"
+    "sandbox": "fresh browser context at /demo/; record IndexedDB database names"
   },
   {
     "id": "no-event-telemetry",
     "claim": "The app has no analytics or third-party calendar processing",
-    "where": "landing privacy section, app lock screen",
+    "where": "landing privacy section, app lock screen, Privacy page, and README",
     "test": "npm run test:e2e -- --grep @claim:no-event-telemetry",
-    "sandbox": "fresh browser context at /?demo=1; record the complete request log and assert that every request is same-origin"
+    "sandbox": "fresh browser context at /demo/; record the complete request log and assert every request is same-origin"
   },
   {
     "id": "encrypted-local-vault",
-    "claim": "Snapshots are encrypted before local storage",
-    "where": "landing privacy section, app vault screen",
+    "claim": "Calendar snapshots are encrypted before local storage",
+    "where": "landing privacy section, vault screen, Privacy page, and README",
     "test": "npm run test:e2e -- --grep @claim:encrypted-local-vault",
-    "sandbox": "fresh browser context; create a vault, import a known event, then assert its IndexedDB envelope does not contain the event title"
+    "sandbox": "fresh browser archive; import a known event and assert its text is absent from the IndexedDB envelope"
+  },
+  {
+    "id": "encrypted-caldav-credentials",
+    "claim": "Saved calendar connection details are encrypted before local storage",
+    "where": "landing privacy section and scheduled connection dialog",
+    "test": "npm run test:e2e -- --grep @claim:encrypted-caldav-credentials",
+    "sandbox": "fresh browser archive with a fixture license; save known connection details and assert the IndexedDB envelope omits each value"
+  },
+  {
+    "id": "passphrase-no-recovery",
+    "claim": "The app cannot reset a lost vault passphrase",
+    "where": "vault screen and Privacy page",
+    "test": "npm run test:e2e -- --grep @claim:passphrase-no-recovery",
+    "sandbox": "fresh browser archive; create a vault, lock it, attempt a different passphrase, and assert the vault stays locked"
+  },
+  {
+    "id": "unchanged-refresh",
+    "claim": "An unchanged calendar copy does not create another edition",
+    "where": "README",
+    "test": "npm run test:e2e -- --grep @claim:unchanged-refresh",
+    "sandbox": "fresh browser archive; import the same ICS file twice and assert one edition remains with an already-current notice"
+  },
+  {
+    "id": "recurrence-timezones",
+    "claim": "Preserves recurring overrides and timezone data in calendar copies and restore files",
+    "where": "README",
+    "test": "npm test -- -t @claim:recurrence-timezones",
+    "sandbox": "fixture calendar with RECURRENCE-ID and VTIMEZONE; inspect parsed instances and generated restore content"
+  },
+  {
+    "id": "calendar-connection",
+    "claim": "Can record a calendar copy from a direct ICS or CalDAV calendar connection",
+    "where": "README, Privacy page, and scheduled connection dialog",
+    "test": "npm run test:e2e -- --grep @claim:calendar-connection",
+    "sandbox": "fresh browser archive with a fixture license and mocked calendar endpoint; save the connection and record the returned calendar copy"
+  },
+  {
+    "id": "native-caldav-transport",
+    "claim": "The desktop transport uses direct ICS GET requests and CalDAV REPORT requests",
+    "where": "README direct ICS and CalDAV connection description",
+    "test": "cargo test --manifest-path src-tauri/Cargo.toml native_caldav_transport",
+    "sandbox": "native transport unit fixture; assert GET for an ICS URL, REPORT for a CalDAV collection URL, and rejection of another URL scheme"
+  },
+  {
+    "id": "scheduled-caldav",
+    "claim": "A US$29 one-time license adds scheduled CalDAV copies while the app is open",
+    "where": "landing license section, Terms page, desktop scheduling dialog, and README",
+    "test": "npm run test:e2e -- --grep @claim:scheduled-caldav",
+    "sandbox": "fresh browser archive with a fixture valid license; configure a 15-minute schedule, advance the browser clock one scheduler tick, and observe one calendar copy"
   },
   {
     "id": "license-price",
-    "claim": "A one-time scheduling license costs US$29",
-    "where": "landing first screen and license section",
+    "claim": "A one-time scheduling license costs US$29 and manual copies, review, and restore stay free",
+    "where": "landing first screen, license section, Terms page, and README",
     "test": "npm run test:e2e -- --grep @claim:license-price",
-    "sandbox": "landing page fixture; assert the stated one-time price and the free manual restore path"
+    "sandbox": "landing page fixture; assert the stated one-time price and free manual path"
+  },
+  {
+    "id": "checksum-install",
+    "claim": "The command-line installer refuses a download with the wrong checksum",
+    "where": "README",
+    "test": "npm test -- -t @claim:checksum-install",
+    "sandbox": "temporary Linux install directory with fixture release manifest and payload; assert a matching payload installs and a mismatched payload is rejected before installation"
+  },
+  {
+    "id": "unsigned-preview",
+    "claim": "Preview installers are not code-signed",
+    "where": "landing install notice and README",
+    "test": "npm test -- -t @claim:unsigned-preview",
+    "sandbox": "release workflow and Tauri bundle fixture; assert no macOS or Windows signing configuration is present"
+  },
+  {
+    "id": "release-packaging",
+    "claim": "Release builds publish native packages, SHA256SUMS, and a platform manifest",
+    "where": "README release workflow section",
+    "test": "npm test -- -t @claim:release-packaging",
+    "sandbox": "release workflow fixture; assert macOS, Windows, and Linux runners plus SHA256SUMS and latest.json publication"
+  },
+  {
+    "id": "site-response-policy",
+    "claim": "Static deployment includes security headers and a styled 404 response",
+    "where": "README release workflow section",
+    "test": "npm test -- -t @claim:site-response-policy",
+    "sandbox": "static deployment configuration fixture; assert header policy and response override without a landing-page navigation fallback"
+  },
+  {
+    "id": "release-downloads",
+    "claim": "The landing page resolves the visitor’s platform download from release metadata",
+    "where": "landing download action",
+    "test": "npm run test:e2e -- --grep @claim:release-downloads",
+    "sandbox": "landing browser fixture with mocked GitHub release metadata; assert the detected platform link targets the matching asset"
   }
 ]

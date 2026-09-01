@@ -70,7 +70,7 @@ function renderLock(exists: boolean): void {
           <p id="status" class="status" role="status" aria-live="polite"></p>
         </form>
       </section>
-      <footer class="lock-footer">No cloud account · No event telemetry · Open standard exports</footer>
+      <footer class="lock-footer">Encrypted local vault · No event telemetry · ICS restore exports</footer>
     </main>`;
   document.querySelector<HTMLFormElement>("#lock-form")!.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -168,7 +168,7 @@ function renderEmpty(): string {
     <h2>Make the current calendar recoverable.</h2>
     <p>Import an ICS export now. Each later copy becomes a new encrypted edition, with additions, moves, and cancellations called out.</p>
     <button class="button primary" data-action="choose-file">Choose an ICS file</button>
-    <p class="field-note">Works with exports from Apple Calendar, Google Calendar, Outlook, and standards-compliant CalDAV servers.</p>
+    <p class="field-note">Import an ICS file from your calendar, then keep a local copy ready to compare.</p>
   </div>`;
 }
 

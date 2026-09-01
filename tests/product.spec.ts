@@ -17,7 +17,7 @@ test("landing page meets the semantic and serious accessibility baseline", async
   expect(errors).toEqual([]);
 });
 
-test("a deleted event can be found and exported in under two minutes", async ({ page }) => {
+test("@claim:calendar-recovery a deleted event can be found and exported in under two minutes", async ({ page }) => {
   const runtimeErrors: string[] = [];
   page.on("pageerror", (error) => runtimeErrors.push(error.message));
   page.on("console", (message) => { if (message.type() === "error") runtimeErrors.push(message.text()); });
@@ -84,7 +84,11 @@ test("@claim:ics-restore-export exports the selected sample event as ICS", async
   await page.getByRole("button", { name: "Export 1 event" }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toMatch(/^calendar-restore-.*\.ics$/);
-  expect(await readFile((await download.path())!, "utf8")).toContain("Airport train");
+  const restore = await readFile((await download.path())!, "utf8");
+  expect(restore).toContain("BEGIN:VCALENDAR");
+  expect(restore).toContain("VERSION:2.0");
+  expect(restore).toContain("BEGIN:VTIMEZONE");
+  expect(restore).toContain("Airport train");
 });
 
 test("@claim:demo-private @claim:no-event-telemetry uses only the demo database and no external requests", async ({ page }) => {
@@ -123,7 +127,83 @@ test("@claim:encrypted-local-vault stores imported event text outside the Indexe
   expect(JSON.stringify(stored)).not.toContain("Unencrypted title must not appear");
 });
 
-test("release download resolution uses only the GitHub API metadata", async ({ page }) => {
+test("@claim:passphrase-no-recovery rejects a different vault passphrase", async ({ page }) => {
+  await page.goto("http://127.0.0.1:1420/");
+  await page.getByLabel("Vault passphrase").fill("correct horse battery staple");
+  await page.getByLabel("Repeat passphrase").fill("correct horse battery staple");
+  await page.getByRole("button", { name: "Create archive" }).click();
+  await page.getByRole("button", { name: "Lock vault" }).click();
+  await page.getByLabel("Vault passphrase").fill("a different long passphrase");
+  await page.getByRole("button", { name: "Unlock archive" }).click();
+  await expect(page.locator("#status")).toContainText("did not unlock this vault");
+  await expect(page.getByRole("heading", { name: "Unlock your archive" })).toBeVisible();
+});
+
+test("@claim:unchanged-refresh keeps an unchanged import out of the archive", async ({ page }) => {
+  await page.goto("http://127.0.0.1:1420/");
+  await page.getByLabel("Vault passphrase").fill("correct horse battery staple");
+  await page.getByLabel("Repeat passphrase").fill("correct horse battery staple");
+  await page.getByRole("button", { name: "Create archive" }).click();
+  const copy = wrap(event("unchanged", "20260910T100000", "Planning review"));
+  await page.locator("#ics-file").setInputFiles({ name: "unchanged.ics", mimeType: "text/calendar", buffer: Buffer.from(copy) });
+  await expect(page.locator(".snapshot-item")).toHaveCount(1);
+  await page.locator("#ics-file").setInputFiles({ name: "unchanged.ics", mimeType: "text/calendar", buffer: Buffer.from(copy) });
+  await expect(page.locator("#status")).toContainText("latest encrypted edition is already current");
+  await expect(page.locator(".snapshot-item")).toHaveCount(1);
+});
+
+test("@claim:calendar-connection @claim:scheduled-caldav @claim:encrypted-caldav-credentials saves protected calendar details and records a scheduled connection", async ({ page }) => {
+  const connectionUrl = "https://calendar.example.test/team-calendar";
+  const connectionUser = "archive-user";
+  const connectionPassword = "app-password-kept-private";
+  const remoteCalendar = wrap(event("remote", "20260912T100000", "Connected calendar copy"));
+  let connectionRequests = 0;
+  await page.clock.install({ time: new Date("2026-09-01T12:00:00Z") });
+  await page.addInitScript(() => {
+    localStorage.setItem("sb_license:calendar-ics-snapshots", "sample-license");
+    localStorage.setItem("sb_license:calendar-ics-snapshots:verdict", JSON.stringify({ valid: true, checkedAt: Date.now() }));
+  });
+  await page.route(connectionUrl, async (route) => {
+    connectionRequests += 1;
+    await route.fulfill({
+      contentType: "text/calendar",
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: remoteCalendar
+    });
+  });
+  await page.goto("http://127.0.0.1:1420/");
+  await page.getByLabel("Vault passphrase").fill("correct horse battery staple");
+  await page.getByLabel("Repeat passphrase").fill("correct horse battery staple");
+  await page.getByRole("button", { name: "Create archive" }).click();
+  await page.getByRole("button", { name: "CalDAV schedule" }).click();
+  await page.locator("#caldav-url").fill(connectionUrl);
+  await page.locator("#caldav-user").fill(connectionUser);
+  await page.locator("#caldav-password").fill(connectionPassword);
+  await page.locator("#schedule").selectOption("15m");
+  await page.getByRole("button", { name: "Save connection" }).click();
+
+  const stored = await page.evaluate(async () => await new Promise<unknown>((resolve, reject) => {
+    const open = indexedDB.open("calendar-snapshotter");
+    open.onsuccess = () => {
+      const transaction = open.result.transaction("vault", "readonly");
+      const get = transaction.objectStore("vault").get("primary");
+      get.onsuccess = () => resolve(get.result);
+      get.onerror = () => reject(get.error);
+    };
+    open.onerror = () => reject(open.error);
+  }));
+  const envelope = JSON.stringify(stored);
+  expect(envelope).not.toContain(connectionUrl);
+  expect(envelope).not.toContain(connectionUser);
+  expect(envelope).not.toContain(connectionPassword);
+
+  await page.clock.fastForward(60_000);
+  await expect.poll(() => connectionRequests).toBe(1);
+  await expect(page.locator(".snapshot-item")).toHaveCount(1);
+  await expect(page.getByText("Connected calendar copy")).toBeVisible();
+});
+
+test("@claim:release-downloads resolves the platform download from GitHub API metadata", async ({ page }) => {
   const consoleErrors: string[] = [];
   const requests: string[] = [];
   page.on("console", (message) => { if (message.type() === "error") consoleErrors.push(message.text()); });
@@ -145,6 +225,30 @@ test("the populated app stays within 390px and keeps archive controls separate",
   const heading = await page.locator(".rail-heading").boundingBox();
   const settings = await page.locator("#connection-settings").boundingBox();
   expect(heading && settings && settings.y >= heading.y + heading.height).toBe(true);
+});
+
+test("landing, footer, and demo actions meet the 44px mobile target", async ({ page }) => {
+  const tooSmall = async () => page.locator("a, button").evaluateAll((elements) => elements
+    .filter((element) => {
+      const style = getComputedStyle(element);
+      return style.display !== "none" && style.visibility !== "hidden";
+    })
+    .map((element) => {
+      const box = element.getBoundingClientRect();
+      return { label: (element.textContent || "").trim(), width: box.width, height: box.height };
+    })
+    .filter((target) => target.width > 0 && target.height > 0 && (target.width < 44 || target.height < 44)));
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("http://127.0.0.1:4174/");
+  expect(await tooSmall()).toEqual([]);
+  await page.goto("http://127.0.0.1:4174/demo/");
+  expect(await tooSmall()).toEqual([]);
+  for (const control of ["#reset-demo", "#start-real"]) {
+    const box = await page.locator(control).boundingBox();
+    expect(box?.width).toBeGreaterThanOrEqual(44);
+    expect(box?.height).toBeGreaterThanOrEqual(44);
+  }
 });
 
 test("the sample archive remains usable after going offline", async ({ page }) => {

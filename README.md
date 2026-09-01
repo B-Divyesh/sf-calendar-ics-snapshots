@@ -1,21 +1,21 @@
 # Calendar Snapshotter
 
-Calendar Snapshotter is a local-first desktop utility for people whose calendar is operational data. It records encrypted editions of ICS or CalDAV calendars, summarizes what was added, moved, or cancelled, and exports selected earlier events as a standards-compatible restore file.
+Calendar Snapshotter is a local-first desktop utility for people whose calendar is operational data. It keeps encrypted calendar copies, shows what changed, and exports selected earlier events as an ICS restore file.
 
 Live site: <https://calendar-ics-snapshots.sociobot.in>
 
-## What v0.1 does
+## What it does
 
-- Creates an AES-256-GCM encrypted local vault from a user passphrase (PBKDF2-SHA-256, 310,000 iterations).
+- Keeps snapshots and saved calendar connection details in an encrypted local vault.
 - Imports ordinary `.ics` exports without an account.
-- Connects to direct ICS feeds or CalDAV calendar collection URLs through the Tauri Rust bridge.
-- Records distinct versions, ignoring unchanged refreshes.
+- Records a calendar copy from a direct ICS or CalDAV connection.
+- Ignores an unchanged refresh instead of creating another edition.
 - Compares editions as added, moved, and cancelled events.
-- Preserves recurring masters, `RECURRENCE-ID` overrides, TZIDs, and `VTIMEZONE` components.
-- Exports only selected earlier event forms to an ICS restore file.
-- Runs paid scheduled CalDAV checks while the desktop app is open.
+- Preserves recurring overrides and timezone data in restore files.
+- Exports selected earlier event forms as a standard ICS restore file.
+- Adds scheduled CalDAV copies while the desktop app is open with the optional license.
 
-The free app includes unlimited manual snapshots, diffs, and restore exports. A US$29 one-time Continuity license unlocks CalDAV scheduling through the Sociobot billing API. Accessibility, data export, and recovery are never paywalled.
+Manual copies, change review, and restore exports are free. A US$29 one-time Continuity license adds scheduling. Accessibility and data export are never paywalled.
 
 ## Try the sample project
 
@@ -33,7 +33,7 @@ curl -fsSL https://calendar-ics-snapshots.sociobot.in/install.sh | sh
 irm https://calendar-ics-snapshots.sociobot.in/install.ps1 | iex
 ```
 
-The v0.1 builds are unsigned. On macOS, right-click the app and choose **Open** on first launch. Windows may show a SmartScreen prompt. GitHub Releases also provides DMG, MSI/EXE, AppImage, DEB, and RPM assets plus `SHA256SUMS`.
+Preview packages are unsigned. On macOS, right-click the app and choose **Open** on first launch. Windows may show a SmartScreen prompt. GitHub Releases provides DMG, MSI/EXE, AppImage, DEB, and RPM assets plus `SHA256SUMS`.
 
 ## Develop
 
@@ -63,7 +63,7 @@ The release workflow runs for `v*` tags and can be dispatched manually. It build
 
 ## Privacy and security model
 
-Calendar content and CalDAV credentials are serialized into one encrypted IndexedDB envelope. The derived key lives only in memory while the vault is open. Calendar requests go directly from the desktop app to the URL the user supplies. The product has no analytics, tracking scripts, remote fonts, or event-content APIs. License verification sends only the entered license token to Sociobot.
+Calendar content and saved calendar connection details are serialized into one encrypted IndexedDB envelope. Calendar requests go directly from the desktop app to the URL the user supplies. The product has no analytics, tracking scripts, remote fonts, or event-content APIs. License verification sends only the entered license token to Sociobot.
 
 The passphrase cannot be recovered. Users should keep independent backups for critical records. See [Privacy](https://calendar-ics-snapshots.sociobot.in/privacy/) and [Terms](https://calendar-ics-snapshots.sociobot.in/terms/).
 

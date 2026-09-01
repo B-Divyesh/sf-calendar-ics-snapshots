@@ -6,7 +6,7 @@ export default defineConfig({
   timeout: 30_000,
   use: { browserName: "chromium" },
   webServer: {
-    command: "npm run build:site && vite preview --config vite.site.config.ts --host 127.0.0.1 --port 4175",
+    command: "npm run build:site && node scripts/serve-static.mjs dist/site 4175",
     port: 4175,
     reuseExistingServer: false
   }

@@ -9,7 +9,7 @@ describe("iCalendar core", () => {
     expect(unfoldIcs("SUMMARY:Long\r\n title")).toEqual(["SUMMARY:Longtitle"]);
   });
 
-  it("preserves recurrence overrides as distinct instances", () => {
+  it("@claim:recurrence-timezones preserves recurrence overrides as distinct instances", () => {
     const parsed = parseIcs(calendar(event("weekly", "20260828T100000", "Weekly") + event("weekly", "20260904T120000", "Weekly moved", "RECURRENCE-ID;TZID=Europe/Paris:20260904T100000\r\n")));
     expect(parsed.events).toHaveLength(2);
     expect(parsed.events[1].key).toContain("20260904T100000");
@@ -21,7 +21,7 @@ describe("iCalendar core", () => {
     expect(diffCalendars(before, after).map((change) => change.kind).sort()).toEqual(["added", "cancelled", "moved"]);
   });
 
-  it("exports the prior form of a moved event with its timezone", () => {
+  it("@claim:recurrence-timezones @claim:ics-restore-export exports the prior form of a moved event with its timezone", () => {
     const before = calendar(event("a", "20260828T100000", "Review"));
     const after = calendar(event("a", "20260828T120000", "Review"));
     const restored = buildRestoreCalendar(before, diffCalendars(before, after));

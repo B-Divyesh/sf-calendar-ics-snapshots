@@ -57,6 +57,8 @@ One generated editorial hero plate clarifies the product: a top-down archive des
 
 Generated with the factory image model (`factory-image`, Azure AI Foundry) on 2026-08-28. Original project asset; no third-party source material. The accepted source and its exact prompt sidecar live in `assets/src/`; optimized WebP and AVIF derivatives ship in the site.
 
+The 1200 × 630 social preview at `public/assets/calendar-snapshotter-social.jpg` is a centered editorial crop of that accepted generated plate, made on 2026-09-01 with ImageMagick. It uses no added text or third-party imagery. The Apple touch icon is a 180 × 180 resize of this product’s hand-authored app icon.
+
 ## Why it fits
 
 Calendar providers present the current truth; Snapshotter preserves editions. A broadsheet’s hierarchy—edition, dateline, corrections, archive—maps directly onto snapshots, diffs, and recovery. The result is recognizable before the logo appears and keeps dense calendar changes calm enough to scan under pressure.
