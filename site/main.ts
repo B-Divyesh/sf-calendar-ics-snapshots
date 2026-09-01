@@ -1,5 +1,8 @@
 import "./site.css";
 
+const queryDemo = new URLSearchParams(location.search).get("demo") === "1";
+if (queryDemo) location.replace("/demo/");
+
 const REPO = "B-Divyesh/sf-calendar-ics-snapshots";
 const RELEASE_API = `https://api.github.com/repos/${REPO}/releases/latest`;
 const LICENSE_KEY = "sb_license:calendar-ics-snapshots";
@@ -64,7 +67,7 @@ async function verifyLicense(token: string): Promise<boolean> {
   return verdict.valid;
 }
 
-const returnedToken = captureReturnedLicense();
+const returnedToken = queryDemo ? "" : captureReturnedLicense();
 const form = document.querySelector<HTMLFormElement>("#license-form");
 const field = document.querySelector<HTMLInputElement>("#license-token");
 if (form && field) {
@@ -83,7 +86,7 @@ if (form && field) {
     } catch { status.textContent = "The license service could not be reached. Try again when online."; }
   });
 }
-if (document.querySelector("#download-button")) void resolveDownload();
+if (!queryDemo && document.querySelector("#download-button")) void resolveDownload();
 
 document.querySelector("#reset-demo")?.addEventListener("click", async () => {
   const status = document.querySelector<HTMLElement>("#demo-status");

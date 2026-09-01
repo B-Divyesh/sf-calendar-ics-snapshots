@@ -76,6 +76,11 @@ test("@claim:sample-project landing demo action opens the shipped isolated sampl
   await expect(page.getByText("Northstar studio week").first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "Review changes in the sample calendar." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Keep a recoverable calendar history." })).toHaveCount(0);
+
+  await page.goto("http://127.0.0.1:4174/?demo=1");
+  await expect(page).toHaveURL(/\/demo\/$/);
+  await expect(page.locator(".snapshot-item")).toHaveCount(2);
+  await expect(page.getByText("Demo — sample data, nothing is saved to your archive.")).toBeVisible();
 });
 
 test("@claim:calendar-diff shows moved and cancelled events in the sample", async ({ page }) => {
