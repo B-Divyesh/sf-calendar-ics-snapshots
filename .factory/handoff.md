@@ -1,27 +1,29 @@
-# Handoff — independent verification 6
+# Handoff — adversarial first-read review 3
 
 ## Result
 
-**PASS** for candidate `f4aaef12c4e1938bedf50a6bea630f2c9cb50103` at <https://calendar-ics-snapshots.sociobot.in/> on 2026-09-02 UTC. Product code was not modified during verification.
+**FAIL** for candidate `25951dab9167d422e79ffd860987662329c4a7af` at <https://calendar-ics-snapshots.sociobot.in/> on 2026-09-02 UTC. Product code was not modified. The full report is `.factory/review-3.md`.
 
 ## What was done
 
-- Checked out the candidate in a fresh detached tree and ran `npm ci`.
-- Ran all 31 declared claim tests, the full unit/browser/static suites, lint, type/Rust check, exact production build, live first-read test, demo recovery flow, mobile/keyboard/reduced-motion checks, Axe, response headers, request logging, cache policy, release metadata, and checksum verification.
-- Installed standard Tauri Linux GLib/GTK/WebKit development packages only in the disposable verifier container so that the Rust checks could compile. No repository code was altered.
-- Wrote the full evidence record in `.factory/verification-6.md`.
+- Reviewed the live first screen cold at 390 × 844 and 1440 × 900.
+- Audited every landing and README sentence, all public routes, metadata, links, focus behavior, the 404, responsive layout, reduced motion, and the distinct visual identity.
+- Exercised the populated demo, restore download, Reset, offline use, storage namespaces, request log, Leave/re-enter behavior, and production-license sentinels.
+- Read every earlier review, polish report, and handoff; rechecked each earlier finding in live behavior and source.
+- Cloned commit `25951da` to `/tmp/calendar-review3-clean.jNiQJY/repo`, ran all 31 claim commands separately, then ran the full unit, lint, TypeScript/Rust, build, browser, and static suites.
+- Installed standard Tauri Linux GLib/GTK/WebKit development packages only in the disposable verifier container so the native Rust claim and check could compile.
 
 ## How to verify
 
-- `npm ci && npm test && npm run lint && npm run check && npm run build`
-- `npm run test:e2e && npm run test:e2e:static`
-- `cargo test --manifest-path src-tauri/Cargo.toml native_caldav_transport`
-- Visit <https://calendar-ics-snapshots.sociobot.in/> and use **Try it with sample data**. The demo opens two Northstar calendar editions with a moved Planning review and cancelled Airport train; select the cancelled event and export its ICS restore file.
+- Read `.factory/review-3.md` for findings F-3-1 through F-3-7 and the complete evidence tables.
+- Reproduce the primary blocker by opening `/demo/`, entering a license token, selecting Reset demo, and inspecting `localStorage` keys beginning `sb_license:`.
+- Reproduce retained demo data by importing a third copy, selecting Leave demo, and re-entering through **Try it with sample data**.
+- Run `npm ci && npm test && npm run lint && npm run check && npm run build && npm run test:e2e && npm run test:e2e:static` after installing the Tauri Linux prerequisites.
 
-## Evidence summary
+## Verification summary
 
-All declared claims passed. The live `index.html` and site JS/CSS assets hash-match the candidate build. Live browser QA had no root/demo console errors and Axe found no serious/critical findings across root, demo, Privacy, Terms, and the styled 404. The v0.1.4 release has macOS, Windows, and Linux packages, a manifest, and checksums; the downloaded Linux RPM matched `SHA256SUMS`.
+All declared commands pass after the documented native build prerequisites are present. The full quality suites pass and `npm run build` produces `dist/app` and `dist/site`. Live initial demo requests are same-origin, Reset restores the two-copy seed without changing a real IndexedDB sentinel, route metadata and links pass, and live Axe scans have no serious/critical findings.
 
 ## Known gaps / next steps
 
-No release-blocking defects found. A Lighthouse run could not complete because its Chromium tab crashed while the first native Tauri compile saturated the disposable verifier container; independent bundle, cache, responsive, keyboard, header, visual, and Axe checks passed. The static product has no product-owned API or sign-in flow, so a 429 allowance or Entra identity check does not apply.
+The demo shares production license storage and retains modified demo data after exit. Three claim tests do not cover their full wording. The first-screen facts omit offline behavior, the mobile app wordmark is only 25 px high, several README claim details are unlisted, and two landing labels need plain rewrites. These are documented with concrete fixes in `.factory/review-3.md`.
