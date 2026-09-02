@@ -12,7 +12,10 @@ test("production static landing opens the isolated desktop sample instead of fal
   await expect(page.getByText("Demo — sample data, nothing is saved to your archive.")).toBeVisible();
   await expect(page.locator(".snapshot-item")).toHaveCount(2);
   await expect(page.getByText("Airport train")).toBeVisible();
-  await expect(page.getByRole("heading", { level: 1, name: "Review changes in the sample calendar." })).toBeVisible();
+  const heading = page.getByRole("heading", { level: 1, name: "Review changes in the sample calendar." });
+  await expect(heading).toBeVisible();
+  await expect(heading).toBeFocused();
+  expect(await heading.evaluate((element) => getComputedStyle(element).outlineColor)).toBe("rgb(158, 47, 40)");
   await expect(page.getByRole("heading", { name: "Keep a recoverable calendar history." })).toHaveCount(0);
   const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations.filter((violation) => ["serious", "critical"].includes(violation.impact || ""))).toEqual([]);
