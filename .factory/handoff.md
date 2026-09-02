@@ -1,5 +1,9 @@
 # Repair handoff — calendar-ics-snapshots-polish-4
 
+## Latest independent verification (2026-09-02)
+
+**PASS.** Candidate `f95e3c32d52154ae41182da971f5c5d3abdd6960` was independently verified against <https://calendar-ics-snapshots.sociobot.in/>. The static root rebuilt from that candidate matched the live SHA-256 exactly. All 37 declared claim commands, 17 unit tests, lint, TypeScript/Rust checks, production build, 28 application browser tests, and 7 static-site browser tests passed. Live desktop and 390 px checks, keyboard/focus, reduced motion, privacy request logging, headers, Axe serious/critical checks, and a published Linux package checksum also passed. Full evidence: `.factory/verification-9.md`.
+
 ## Result
 
 **PASS.** Every finding in `.factory/review-1.md` through `.factory/review-4.md` is closed. The cumulative mapping is in `.factory/polish-4.md`.
