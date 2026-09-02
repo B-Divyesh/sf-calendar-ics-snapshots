@@ -7,7 +7,7 @@ const REPO = "B-Divyesh/sf-calendar-ics-snapshots";
 const RELEASE_API = `https://api.github.com/repos/${REPO}/releases/latest`;
 const LICENSE_KEY = "sb_license:calendar-ics-snapshots";
 const VERDICT_KEY = `${LICENSE_KEY}:verdict`;
-type Platform = "macos_arm64" | "macos_x64" | "windows" | "linux";
+type Platform = "macos_arm64" | "macos_x64" | "windows" | "linux" | "mobile";
 type Release = { tag_name: string; assets?: { name: string; browser_download_url: string }[] };
 const BUNDLED_RELEASE: Release = {
   tag_name: "v0.1.4",
@@ -20,7 +20,10 @@ const BUNDLED_RELEASE: Release = {
 };
 
 function platform(): Platform {
-  const hint = (navigator as Navigator & { userAgentData?: { platform: string } }).userAgentData?.platform || navigator.platform || navigator.userAgent;
+  const nav = navigator as Navigator & { userAgentData?: { platform: string; mobile?: boolean } };
+  const userAgent = navigator.userAgent;
+  if (nav.userAgentData?.mobile || /Android|iPhone|iPad|iPod|Mobile/i.test(userAgent)) return "mobile";
+  const hint = nav.userAgentData?.platform || navigator.platform || userAgent;
   if (/mac/i.test(hint)) return /arm|aarch64/i.test(navigator.userAgent) ? "macos_arm64" : "macos_x64";
   if (/win/i.test(hint)) return "windows";
   return "linux";
@@ -30,8 +33,14 @@ function applyRelease(release: Release): boolean {
   const button = document.querySelector<HTMLAnchorElement>("#download-button")!;
   const note = document.querySelector<HTMLElement>("#platform-note")!;
   const selected = platform();
+  if (selected === "mobile") {
+    button.href = `https://github.com/${REPO}/releases/latest`;
+    button.textContent = "View desktop downloads on GitHub";
+    note.textContent = "Calendar Snapshotter runs on macOS, Windows, and desktop Linux.";
+    return true;
+  }
   const label = selected.startsWith("macos") ? "macOS" : selected === "windows" ? "Windows" : "Linux";
-  const patterns: Record<Platform, RegExp> = {
+  const patterns: Record<Exclude<Platform, "mobile">, RegExp> = {
     macos_arm64: /(aarch64|arm64).*\.dmg$/i,
     macos_x64: /(x64|x86_64).*\.dmg$/i,
     windows: /(setup.*\.exe|\.msi)$/i,
@@ -41,7 +50,7 @@ function applyRelease(release: Release): boolean {
   if (!asset?.browser_download_url) return false;
   button.href = asset.browser_download_url;
   button.textContent = `Download for ${label} on GitHub`;
-  note.textContent = `${release.tag_name} · checksum published`;
+  note.textContent = `${release.tag_name} · download check available`;
   return true;
 }
 

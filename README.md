@@ -23,11 +23,11 @@ Keyboard access, screen-reader structure, archive backup, and restore files do n
 
 Use the desktop browser entry at `/?demo=1`. You can also choose **Try it with sample data** on the [landing page](https://calendar-ics-snapshots.sociobot.in).
 
-The [browser demo](https://calendar-ics-snapshots.sociobot.in/demo/) uses separate browser storage named `demo:calendar-snapshotter`. The second calendar copy moves a planning review and removes an airport train. **Reset demo** restores the two shipped calendar copies without changing a real vault.
+The [browser demo](https://calendar-ics-snapshots.sociobot.in/demo/) uses separate browser storage named `demo:calendar-snapshotter`. The second calendar copy moves a planning review and removes an airport train. **Reset demo** restores the two shipped calendar copies without changing a real vault. **Leave demo** returns to the download page without copying sample data.
 
 ## Install
 
-Download the detected installer from the [landing page](https://calendar-ics-snapshots.sociobot.in), or use a checksum-verifying installer:
+Download the detected desktop installer from the [landing page](https://calendar-ics-snapshots.sociobot.in), or use an installer that checks the download before installing:
 
 ```sh
 curl -fsSL https://calendar-ics-snapshots.sociobot.in/install.sh | sh
@@ -37,7 +37,7 @@ curl -fsSL https://calendar-ics-snapshots.sociobot.in/install.sh | sh
 irm https://calendar-ics-snapshots.sociobot.in/install.ps1 | iex
 ```
 
-Preview packages are unsigned. GitHub Releases provides DMG, MSI/EXE, AppImage, DEB, and RPM assets. Each release also includes `SHA256SUMS`.
+Preview packages are unsigned. GitHub Releases provides DMG, MSI/EXE, AppImage, DEB, and RPM assets. Each release includes a SHA-256 file-check list (`SHA256SUMS`).
 
 ## Develop
 
@@ -69,7 +69,7 @@ Static deployment publishes `dist/site`. It includes security headers, asset cac
 
 ## Privacy and security model
 
-Calendar content and saved connection details are stored in one encrypted browser database record. Calendar requests go from the desktop app to the URL the user supplies.
+Calendar content and saved connection details are stored in one encrypted browser database record. Calendar requests go from the desktop app to the URL the user supplies. Use **Delete local archive** in the app to remove this vault.
 
 The product has no analytics, tracking scripts, remote fonts, or calendar-content services. License verification sends only the entered license token to Sociobot.
 
@@ -80,7 +80,7 @@ The passphrase cannot be recovered. Users should keep independent backups for cr
 - `src/` — desktop UI, encrypted vault, calendar parser, comparison, and export
 - `src-tauri/` — Tauri 2 shell and native calendar server transport
 - `site/` — product, download, privacy, and terms pages
-- `public/install.*` — checksum-verifying installers
+- `public/install.*` — installers that check downloads before installing
 - `.github/workflows/release.yml` — native release matrix and manifests
 - `.factory/design.md` — visual system and asset provenance
 

@@ -16,7 +16,7 @@ This table records every visible landing-page line. Counts split on spaces. No l
 | Manual calendar copies and restore files are free. | 8 | — |
 | New scheduling licenses are not currently for sale. | 8 | — |
 | Download for Linux / Windows / macOS on GitHub | 6 each | — |
-| v0.1.4 · checksum published | 4 | — |
+| v0.1.4 · download check available | 5 | — |
 | Published download ready. | 3 | — |
 | Check for a newer release | 5 | — |
 | The latest check was unavailable. | 5 | — |
@@ -68,7 +68,7 @@ This table records every visible landing-page line. Counts split on spaces. No l
 | 3. Export a restore file | 5 | — |
 | Import the file into your calendar. | 6 | — |
 | Install from the command line | 5 | — |
-| Install with one command. | 4 | — |
+| Command-line installers. | 2 | — |
 | macOS / Linux | 3 | — |
 | Windows PowerShell | 2 | — |
 | Unsigned preview: v0.1.4 installers are not code-signed. | 7 | — |

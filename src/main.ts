@@ -65,7 +65,7 @@ function renderLock(exists: boolean): void {
           <label for="passphrase">Vault passphrase</label>
           <input id="passphrase" name="passphrase" type="password" minlength="10" autocomplete="${exists ? "current-password" : "new-password"}" required aria-describedby="pass-hint">
           ${exists ? "" : `<label for="confirm">Repeat passphrase</label><input id="confirm" name="confirm" type="password" minlength="10" autocomplete="new-password" required>`}
-          <p class="field-note" id="pass-hint">At least 10 characters. Stored data uses AES-256-GCM encryption.</p>
+          <p class="field-note" id="pass-hint">At least 10 characters. Stored data is encrypted before local storage.</p>
           <button class="button primary" type="submit">${exists ? "Unlock archive" : "Create archive"}</button>
           ${exists ? "" : `<button class="button secondary" id="load-sample" type="button">Load sample project</button><p class="field-note">It opens a separate sample vault. Your archive is not read or changed.</p>`}
           <p id="status" class="status" role="status" aria-live="polite"></p>
@@ -121,7 +121,7 @@ function renderApp(): void {
   selectedChanges = new Set([...selectedChanges].filter((id) => changes.some((change) => change.id === id)));
   app.innerHTML = `
     ${staticDemoRoute ? `<header class="site-shell-header"><a class="site-wordmark" href="/" aria-label="Calendar Snapshotter home"><span>Calendar</span> Snapshotter</a><nav aria-label="Main navigation"><a href="/">Home</a><a href="/demo/" aria-current="page">Demo</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav></header><p id="route-announcer" class="visually-hidden" role="status" aria-live="polite"></p>` : ""}
-    ${demoMode ? `<aside class="demo-banner" aria-label="Demo mode"><strong>Demo — sample data, nothing is saved to your archive.</strong><span><button class="text-button" id="reset-demo">Reset demo</button><button class="text-button" id="start-real">Start for real</button></span></aside>` : ""}
+    ${demoMode ? `<aside class="demo-banner" aria-label="Demo mode"><strong>Demo — sample data, nothing is saved to your archive.</strong><span><button class="text-button" id="reset-demo">Reset demo</button><button class="text-button" id="start-real">Leave demo</button></span></aside>` : ""}
     <header class="app-header">
       <div>
         <p class="eyebrow">Local calendar archive</p>
@@ -129,7 +129,7 @@ function renderApp(): void {
       </div>
       <div class="header-actions">
         <span class="connection-state" id="network-state"><span aria-hidden="true">●</span> ${navigator.onLine ? "On device" : "Offline"}</span>
-        <button class="text-button" id="lock-vault">Lock vault</button>
+        ${demoMode ? "" : `<button class="text-button" id="lock-vault">Lock vault</button>`}
       </div>
     </header>
     <main id="main" class="workspace">
@@ -149,7 +149,7 @@ function renderApp(): void {
             </button></li>`;
           }).join("") : `<li class="empty-rail">No calendar copies yet</li>`}
         </ol>
-        <div class="archive-actions"><button class="text-button" id="export-archive">Export encrypted archive</button><button class="text-button" id="import-archive">Import encrypted archive</button></div>
+        <div class="archive-actions"><button class="text-button" id="export-archive">Export encrypted archive</button><button class="text-button" id="import-archive">Import encrypted archive</button>${demoMode ? "" : `<button class="text-button" id="delete-archive">Delete local archive</button>`}</div>
         <button class="text-button settings-link" id="connection-settings">Calendar server schedule</button>
       </aside>
       <section class="edition" aria-live="polite">
@@ -276,6 +276,7 @@ function bindAppEvents(): void {
   document.querySelector("#export-archive")?.addEventListener("click", exportArchive);
   document.querySelector("#import-archive")?.addEventListener("click", () => document.querySelector<HTMLInputElement>("#archive-file")?.click());
   document.querySelector<HTMLInputElement>("#archive-file")?.addEventListener("change", prepareArchiveImport);
+  document.querySelector("#delete-archive")?.addEventListener("click", () => void deleteArchive());
   document.querySelector("#lock-vault")?.addEventListener("click", async () => { vault = undefined; window.clearInterval(scheduler); renderLock(true); });
   document.querySelector("#connection-settings")?.addEventListener("click", () => document.querySelector<HTMLDialogElement>("#settings-dialog")!.showModal());
   document.querySelector("[data-close-settings]")?.addEventListener("click", () => document.querySelector<HTMLDialogElement>("#settings-dialog")!.close());
@@ -307,6 +308,19 @@ function bindAppEvents(): void {
     url.searchParams.delete("demo");
     location.assign(url.toString());
   });
+}
+
+async function deleteArchive(): Promise<void> {
+  if (!confirm("Delete this local archive? This removes its calendar copies and saved calendar connection from this device.")) return;
+  try {
+    vault = undefined;
+    window.clearInterval(scheduler);
+    await removeVaultStorage();
+    renderLock(false);
+    announce("The local archive was deleted.");
+  } catch (error) {
+    announce(error instanceof Error ? error.message : "The local archive could not be deleted.", true);
+  }
 }
 
 async function exportArchive(): Promise<void> {

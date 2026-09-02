@@ -102,7 +102,7 @@
     "claim": "Manual calendar copies, review, archive backup, and restore files remain available without a license",
     "where": "landing first screen, license section, Terms page, desktop scheduling dialog, and README",
     "test": "npm run test:e2e -- --grep @claim:license-price",
-    "sandbox": "landing and desktop fixtures; assert the free features and absence of a checkout action"
+    "sandbox": "fresh unlicensed browser archive; import changed calendar copies, review changes, export a restore file, export and restore the full encrypted archive, and assert no license gate or checkout action"
   },
   {
     "id": "demo-reset",
@@ -204,9 +204,16 @@
   },
   {
     "id": "release-downloads",
-    "claim": "The landing page resolves the visitor’s platform download from release metadata",
+    "claim": "The landing page resolves a matching desktop download and sends phone visitors to desktop downloads",
     "where": "landing download action",
     "test": "npm run test:e2e -- --grep @claim:release-downloads",
-    "sandbox": "landing browser fixture with mocked GitHub release metadata; assert the detected platform link targets the matching asset"
+    "sandbox": "desktop and Android/iPhone landing browser fixtures with mocked GitHub release metadata; assert desktop links target matching assets and phone links do not target a binary"
+  },
+  {
+    "id": "delete-local-vault",
+    "claim": "Delete local archive removes the vault from this device",
+    "where": "Privacy page, desktop archive controls, and README",
+    "test": "npm run test:e2e -- --grep @claim:delete-local-vault",
+    "sandbox": "fresh browser archive; import a calendar copy, confirm Delete local archive, and assert the IndexedDB vault record is absent"
   }
 ]

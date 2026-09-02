@@ -150,11 +150,58 @@ test("@claim:demo-reset restores the seed and leaves real storage untouched", as
   expect(sentinel).toBe("real-data");
 });
 
-test("@claim:license-price keeps core recovery features free and exposes no dead checkout", async ({ page }) => {
-  await page.goto("http://127.0.0.1:4174/");
-  await expect(page.getByText("New scheduling licenses are not currently for sale.").first()).toBeVisible();
-  await expect(page.getByText(/Manual calendar copies, change review, full archive backup, and restore files remain free/)).toBeVisible();
-  await expect(page.locator('a[href*="/checkout"]')).toHaveCount(0);
+test("@claim:license-price keeps manual recovery, review, backup, and restore available without a license", async ({ page }) => {
+  await page.goto("http://127.0.0.1:1420/");
+  await page.getByLabel("Vault passphrase").fill("correct horse battery staple");
+  await page.getByLabel("Repeat passphrase").fill("correct horse battery staple");
+  await page.getByRole("button", { name: "Create archive" }).click();
+  const before = wrap(event("free-planning", "20260910T100000", "Free planning review") + event("free-train", "20260911T100000", "Free airport train"));
+  const after = wrap(event("free-planning", "20260910T120000", "Free planning review"));
+  await page.locator("#ics-file").setInputFiles({ name: "before.ics", mimeType: "text/calendar", buffer: Buffer.from(before) });
+  await page.locator("#ics-file").setInputFiles({ name: "after.ics", mimeType: "text/calendar", buffer: Buffer.from(after) });
+  await expect(page.getByText("Free airport train")).toBeVisible();
+  await page.locator(".change-row.cancelled input").check();
+  const restorePromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export 1 event" }).click();
+  expect(await (await restorePromise).path()).toBeTruthy();
+  const archivePromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export encrypted archive" }).click();
+  const archivePath = await (await archivePromise).path();
+  expect(archivePath).toBeTruthy();
+  const changedAgain = wrap(event("free-later", "20260912T100000", "Later free calendar copy"));
+  await page.locator("#ics-file").setInputFiles({ name: "later.ics", mimeType: "text/calendar", buffer: Buffer.from(changedAgain) });
+  await expect(page.locator(".snapshot-item")).toHaveCount(3);
+  await page.locator("#archive-file").setInputFiles(archivePath!);
+  await page.getByLabel("Archive passphrase").fill("correct horse battery staple");
+  await page.locator("#archive-import-form").getByRole("button", { name: "Import encrypted archive" }).click();
+  await expect(page.locator(".snapshot-item")).toHaveCount(2);
+  await expect(page.getByText("Later free calendar copy")).toHaveCount(0);
+  await page.getByRole("button", { name: "Calendar server schedule" }).click();
+  await expect(page.locator("#settings-dialog").getByRole("button", { name: "View the scheduling license" })).toBeVisible();
+});
+
+test("@claim:delete-local-vault removes the confirmed archive from local browser storage", async ({ page }) => {
+  await page.goto("http://127.0.0.1:1420/");
+  await page.getByLabel("Vault passphrase").fill("correct horse battery staple");
+  await page.getByLabel("Repeat passphrase").fill("correct horse battery staple");
+  await page.getByRole("button", { name: "Create archive" }).click();
+  const calendar = wrap(event("delete-me", "20260910T100000", "Archive to remove"));
+  await page.locator("#ics-file").setInputFiles({ name: "delete.ics", mimeType: "text/calendar", buffer: Buffer.from(calendar) });
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: "Delete local archive" }).click();
+  await expect(page.getByRole("heading", { name: "Create your encrypted archive" })).toBeVisible();
+  const record = await page.evaluate(async () => await new Promise<unknown>((resolve, reject) => {
+    const open = indexedDB.open("calendar-snapshotter");
+    open.onsuccess = () => {
+      const db = open.result;
+      if (!db.objectStoreNames.contains("vault")) { db.close(); resolve(undefined); return; }
+      const get = db.transaction("vault", "readonly").objectStore("vault").get("primary");
+      get.onsuccess = () => { db.close(); resolve(get.result); };
+      get.onerror = () => reject(get.error);
+    };
+    open.onerror = () => reject(open.error);
+  }));
+  expect(record).toBeUndefined();
 });
 
 test("@claim:encrypted-local-vault stores imported event text outside the IndexedDB envelope", async ({ page }) => {
@@ -349,7 +396,7 @@ test("@claim:calendar-connection @claim:scheduled-caldav @claim:encrypted-caldav
   await expect(page.getByText("Connected calendar copy")).toBeVisible();
 });
 
-test("@claim:release-downloads resolves the platform download from GitHub API metadata", async ({ page }) => {
+test("@claim:release-downloads resolves desktop assets and sends Android and iPhone visitors to desktop downloads", async ({ page, browser }) => {
   const consoleErrors: string[] = [];
   const requests: string[] = [];
   page.on("console", (message) => { if (message.type() === "error") consoleErrors.push(message.text()); });
@@ -363,6 +410,30 @@ test("@claim:release-downloads resolves the platform download from GitHub API me
   await expect(page.locator("#download-button")).toHaveAttribute("href", /Calendar-Snapshotter_0\.1\.1_amd64\.AppImage$/);
   expect(requests.some((url) => /latest\.json/.test(url))).toBe(false);
   expect(consoleErrors).toEqual([]);
+
+  for (const userAgent of [
+    "Mozilla/5.0 (Linux; Android 14; Pixel 5) AppleWebKit/537.36 Chrome/120.0 Mobile Safari/537.36",
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Version/17.0 Mobile/15E148 Safari/604.1"
+  ]) {
+    const mobileContext = await browser.newContext({ userAgent, viewport: { width: 390, height: 844 } });
+    const mobilePage = await mobileContext.newPage();
+    await mobilePage.goto("http://127.0.0.1:4174/");
+    await expect(mobilePage.locator("#download-button")).toHaveText("View desktop downloads on GitHub");
+    await expect(mobilePage.locator("#download-button")).not.toHaveAttribute("href", /AppImage|\.dmg|\.exe|\.msi/i);
+    await expect(mobilePage.locator("#platform-note")).toContainText("runs on macOS, Windows, and desktop Linux");
+    await mobileContext.close();
+  }
+});
+
+test("demo controls keep the sample safety shell available until the visitor leaves", async ({ page }) => {
+  await page.goto("http://127.0.0.1:4174/demo/");
+  await expect(page.getByRole("button", { name: "Lock vault" })).toHaveCount(0);
+  for (const selector of [".site-shell-header", ".demo-banner", ".site-shell-footer"]) await expect(page.locator(selector)).toBeVisible();
+  await page.getByRole("button", { name: "Reset demo" }).click();
+  await expect(page.locator(".snapshot-item")).toHaveCount(2);
+  for (const selector of [".site-shell-header", ".demo-banner", ".site-shell-footer"]) await expect(page.locator(selector)).toBeVisible();
+  await page.getByRole("button", { name: "Leave demo" }).click();
+  await expect(page).toHaveURL("http://127.0.0.1:4174/");
 });
 
 test("the populated app stays within 390px and keeps archive controls separate", async ({ page }) => {
