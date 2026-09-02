@@ -151,7 +151,9 @@ test("@claim:demo-private @claim:no-event-telemetry uses only demo storage and n
   await expect(page.locator("#settings-dialog")).toContainText("does not read, save, or verify licenses");
   await expect(page.locator("#settings-dialog input")).toHaveCount(0);
   await page.getByRole("button", { name: "Close settings" }).click();
+  const privateResetNavigation = page.waitForEvent("framenavigated", (frame) => frame === page.mainFrame());
   await page.getByRole("button", { name: "Reset demo" }).click();
+  await privateResetNavigation;
   await expect(page.locator(".snapshot-item")).toHaveCount(2);
   const storedLicense = await page.evaluate(() => ({
     token: localStorage.getItem("sb_license:calendar-ics-snapshots"),
@@ -178,7 +180,9 @@ test("@claim:demo-reset restores the seed and leaves real storage untouched", as
   const added = wrap(event("reset-check", "20260918T100000", "Reset check"));
   await page.locator("#ics-file").setInputFiles({ name: "reset-check.ics", mimeType: "text/calendar", buffer: Buffer.from(added) });
   await expect(page.locator(".snapshot-item")).toHaveCount(3);
+  const resetNavigation = page.waitForEvent("framenavigated", (frame) => frame === page.mainFrame());
   await page.getByRole("button", { name: "Reset demo" }).click();
+  await resetNavigation;
   await expect(page.locator(".snapshot-item")).toHaveCount(2);
   await expect(page.getByText("Reset check")).toHaveCount(0);
   const sentinel = await page.evaluate(async () => await new Promise((resolve, reject) => {
@@ -518,7 +522,9 @@ test("demo controls keep the sample safety shell available until the visitor lea
   await page.goto("http://127.0.0.1:4174/demo/");
   await expect(page.getByRole("button", { name: "Lock vault" })).toHaveCount(0);
   for (const selector of [".site-shell-header", ".demo-banner", ".site-shell-footer"]) await expect(page.locator(selector)).toBeVisible();
+  const shellResetNavigation = page.waitForEvent("framenavigated", (frame) => frame === page.mainFrame());
   await page.getByRole("button", { name: "Reset demo" }).click();
+  await shellResetNavigation;
   await expect(page.locator(".snapshot-item")).toHaveCount(2);
   for (const selector of [".site-shell-header", ".demo-banner", ".site-shell-footer"]) await expect(page.locator(selector)).toBeVisible();
   await page.getByRole("button", { name: "Leave demo" }).click();
