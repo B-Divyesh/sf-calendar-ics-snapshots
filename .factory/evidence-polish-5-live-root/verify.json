@@ -1,0 +1,14 @@
+{
+  "url": "https://calendar-ics-snapshots.sociobot.in/",
+  "loadMs": 913,
+  "errors": [],
+  "a11y": {
+    "title": "Calendar Snapshotter — recover calendar changes",
+    "lang": "en",
+    "h1": 1,
+    "main": true,
+    "imgsMissingAlt": 0,
+    "buttonsUnlabeled": 0,
+    "textLength": 2775
+  }
+}
