@@ -216,10 +216,14 @@ test("@claim:demo-leave discards changed sample data before returning to the lan
   const changed = wrap(event("demo-leave", "20260919T100000", "Discard this sample change"));
   await page.locator("#ics-file").setInputFiles({ name: "demo-leave.ics", mimeType: "text/calendar", buffer: Buffer.from(changed) });
   await expect(page.locator(".snapshot-item")).toHaveCount(3);
+  const leaveNavigation = page.waitForEvent("framenavigated", (frame) => frame === page.mainFrame());
   await page.getByRole("button", { name: "Leave demo" }).click();
+  await leaveNavigation;
   await expect(page).toHaveURL("http://127.0.0.1:4174/");
   expect(await page.evaluate(() => localStorage.getItem("real-vault-license-sentinel"))).toBe("keep");
+  const demoNavigation = page.waitForEvent("framenavigated", (frame) => frame === page.mainFrame());
   await page.getByRole("link", { name: "Try it with sample data" }).click();
+  await demoNavigation;
   await expect(page.locator(".snapshot-item")).toHaveCount(2);
   await expect(page.getByText("Discard this sample change")).toHaveCount(0);
   const sentinel = await page.evaluate(async () => await new Promise((resolve, reject) => {
