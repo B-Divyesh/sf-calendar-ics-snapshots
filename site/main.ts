@@ -10,13 +10,13 @@ const VERDICT_KEY = `${LICENSE_KEY}:verdict`;
 type Platform = "macos_arm64" | "macos_x64" | "windows" | "linux" | "mobile";
 type Release = { tag_name: string; assets?: { name: string; browser_download_url: string }[] };
 const BUNDLED_RELEASE: Release = {
-  tag_name: "v0.1.5",
+  tag_name: "v0.1.6",
   assets: [
-    "Calendar.Snapshotter_0.1.5_aarch64.dmg",
-    "Calendar.Snapshotter_0.1.5_x64.dmg",
-    "Calendar.Snapshotter_0.1.5_x64-setup.exe",
-    "Calendar.Snapshotter_0.1.5_amd64.AppImage"
-  ].map((name) => ({ name, browser_download_url: `https://github.com/${REPO}/releases/download/v0.1.5/${name}` }))
+    "Calendar.Snapshotter_0.1.6_aarch64.dmg",
+    "Calendar.Snapshotter_0.1.6_x64.dmg",
+    "Calendar.Snapshotter_0.1.6_x64-setup.exe",
+    "Calendar.Snapshotter_0.1.6_amd64.AppImage"
+  ].map((name) => ({ name, browser_download_url: `https://github.com/${REPO}/releases/download/v0.1.6/${name}` }))
 };
 
 function platform(): Platform {
@@ -68,7 +68,7 @@ async function resolveDownload(refresh = false): Promise<void> {
     if (!applyRelease(release)) throw new Error("Platform asset missing");
   } catch {
     applyRelease(BUNDLED_RELEASE);
-    note.textContent = "The latest check was unavailable. The published v0.1.5 download is ready.";
+    note.textContent = "The latest check was unavailable. The published v0.1.6 download is ready.";
   }
 }
 

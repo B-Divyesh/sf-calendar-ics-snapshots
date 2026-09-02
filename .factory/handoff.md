@@ -2,7 +2,7 @@
 
 ## Result
 
-Release blockers from independent verification 7 are repaired in version 0.1.5. The product remains a Tauri 2 desktop app with a static landing site and browser sample.
+Release blockers from independent verification 7 are repaired in version 0.1.6. The product remains a Tauri 2 desktop app with a static landing site and browser sample.
 
 ## Repairs
 
@@ -15,7 +15,8 @@ Release blockers from independent verification 7 are repaired in version 0.1.5. 
 - Routed the native claim and Linux release job through that setup. A stock worker now provisions prerequisites before compiling.
 - Added `npm run test:claims` to execute every claim command independently.
 - Added the release source commit to `latest.json`, so package provenance can be compared directly with the release tag.
-- Bumped the app, package, site, and bundled fallback download metadata to v0.1.5.
+- Made the static-site package claim invoke Vite through Node directly. This avoids the `npm.cmd` spawn failure reproduced on the Windows Node 24 release runner.
+- Bumped the app, package, site, and bundled fallback download metadata to v0.1.6.
 
 ## Verification evidence
 
@@ -33,10 +34,10 @@ Release blockers from independent verification 7 are repaired in version 0.1.5. 
 - Browser coverage includes desktop, 390 × 844 mobile, keyboard-only export, Axe, reduced motion, offline demo export, request privacy, release refresh fallback, and styled HTTP 404 behavior.
 - Lighthouse mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100; FCP 1.00 s, LCP 1.36 s, TBT 0 ms, CLS 0.0065.
 - Built site payloads: landing JS 4,123 bytes, demo JS 33,527 bytes, site CSS 9,677 bytes, demo CSS 12,647 bytes, mobile hero AVIF 11,093 bytes.
-- Local native packaging: AppImage, DEB, and RPM built successfully. The DEB reports `calendar-snapshotter 0.1.5 amd64`; the RPM reports `calendar-snapshotter 0.1.5 x86_64`.
-- Local package SHA-256: AppImage `9ece7633c32dcd33787f643705dc1501dd11f0876f984a5cab0c42b7f355a524`; DEB `79f0648548d16a690044504286cbf485ad6a2ec9288febbb8eb73a080df833bf`; RPM `133f4707d0775d7d1654b807b5916bac73bc3421dff60fb5c378a59bc5c9c176`.
-- Deployed root SHA-256: `1edc6b554c088b7318405aa1ee2cecd21ceb962bdb143a879642f7034a2f061d`, matching `dist/site/index.html`.
-- Release `v0.1.5` contains arm64 and x64 DMGs, EXE, MSI, AppImage, DEB, RPM, `SHA256SUMS`, and `latest.json`. The manifest `source_sha` matches the v0.1.5 tag commit, and every downloaded asset matches `SHA256SUMS`.
+- Local native packaging: AppImage, DEB, and RPM built successfully. The DEB reports `calendar-snapshotter 0.1.6 amd64`; the RPM reports `calendar-snapshotter 0.1.6 x86_64`.
+- Local package SHA-256: AppImage `39a7b35b0c09b8f6ed233fa499ba2e109993a150605db7742df871263b5c1fe2`; DEB `fccd0fb60e87d564745891a74ad6441479635ebc17f66df1adcd74fd7d9b40ce`; RPM `d7a3789c5591c918b58352a6db6dcf1b182d01270d0fbd5d5b9774b197344839`.
+- Deployed root SHA-256: `c24dab3d03fc5d96c00d8c136b4eb003ffcbfced343729cc1b98f4c28cd07d33`, matching `dist/site/index.html`.
+- Release `v0.1.6` contains arm64 and x64 DMGs, EXE, MSI, AppImage, DEB, RPM, `SHA256SUMS`, and `latest.json`. The manifest `source_sha` matches the v0.1.6 tag commit, and every downloaded asset matches `SHA256SUMS`.
 
 ## Reproduce
 

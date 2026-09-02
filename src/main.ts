@@ -164,7 +164,7 @@ function renderApp(): void {
       <p id="status" class="status" role="status" aria-live="polite"></p>
       ${demoMode ? `<p class="demo-license-note">Scheduling is disabled in this sample.</p>` : `<button class="text-button" id="license-button">${unlocked ? "Scheduling license active" : "View the scheduling license"}</button>`}
     </footer>
-    ${staticDemoRoute ? `<footer class="site-shell-footer"><p>Calendar Snapshotter · Local calendar copies and restore files</p><nav aria-label="Footer navigation"><a href="/">Home</a><a href="/demo/">Demo</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-calendar-ics-snapshots" rel="noreferrer">Source on GitHub <span class="visually-hidden">(external)</span></a></nav><p>Built by Param Factory · v0.1.5</p></footer>` : ""}
+    ${staticDemoRoute ? `<footer class="site-shell-footer"><p>Calendar Snapshotter · Local calendar copies and restore files</p><nav aria-label="Footer navigation"><a href="/">Home</a><a href="/demo/">Demo</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-calendar-ics-snapshots" rel="noreferrer">Source on GitHub <span class="visually-hidden">(external)</span></a></nav><p>Built by Param Factory · v0.1.6</p></footer>` : ""}
     <dialog id="settings-dialog" aria-labelledby="settings-title">${renderSettings()}</dialog>
     <dialog id="license-dialog" aria-labelledby="license-title">${renderLicense()}</dialog>
     <dialog id="archive-dialog" aria-labelledby="archive-title">${renderArchiveImport()}</dialog>`;

@@ -15,20 +15,20 @@ describe("release workflow", () => {
     const directory = await mkdtemp(join(tmpdir(), "calendar-snapshotter-release-"));
     const sourceSha = "0123456789abcdef0123456789abcdef01234567";
     const assets = [
-      "Calendar.Snapshotter_0.1.5_aarch64.dmg",
-      "Calendar.Snapshotter_0.1.5_x64.dmg",
-      "Calendar.Snapshotter_0.1.5_x64-setup.exe",
-      "Calendar.Snapshotter_0.1.5_amd64.AppImage",
-      "Calendar.Snapshotter_0.1.5_amd64.deb",
-      "Calendar.Snapshotter_0.1.5_amd64.rpm"
+      "Calendar.Snapshotter_0.1.6_aarch64.dmg",
+      "Calendar.Snapshotter_0.1.6_x64.dmg",
+      "Calendar.Snapshotter_0.1.6_x64-setup.exe",
+      "Calendar.Snapshotter_0.1.6_amd64.AppImage",
+      "Calendar.Snapshotter_0.1.6_amd64.deb",
+      "Calendar.Snapshotter_0.1.6_amd64.rpm"
     ];
     try {
       await Promise.all(assets.map((name, index) => writeFile(join(directory, name), `fixture native package ${index}\n`)));
-      const generated = spawnSync(process.execPath, ["scripts/release-manifest.mjs", directory, "B-Divyesh/sf-calendar-ics-snapshots", "v0.1.5", sourceSha], { cwd: process.cwd(), encoding: "utf8" });
+      const generated = spawnSync(process.execPath, ["scripts/release-manifest.mjs", directory, "B-Divyesh/sf-calendar-ics-snapshots", "v0.1.6", sourceSha], { cwd: process.cwd(), encoding: "utf8" });
       expect(generated.status, generated.stderr).toBe(0);
       expect((await stat(join(directory, "SHA256SUMS"))).size).toBeGreaterThan(0);
       const manifest = JSON.parse(await readFile(join(directory, "latest.json"), "utf8")) as { version: string; source_sha: string; platforms: Record<string, { name: string; url: string; sha256: string }> };
-      expect(manifest.version).toBe("v0.1.5");
+      expect(manifest.version).toBe("v0.1.6");
       expect(manifest.source_sha).toBe(sourceSha);
       expect(Object.keys(manifest.platforms).sort()).toEqual(["linux", "macos_arm64", "macos_x64", "windows"]);
       for (const platform of Object.values(manifest.platforms)) {
@@ -74,8 +74,7 @@ describe("release workflow", () => {
   });
 
   it("@claim:static-site-output builds every static route under dist/site", async () => {
-    const command = process.platform === "win32" ? "npm.cmd" : "npm";
-    const build = spawnSync(command, ["run", "build:site"], { cwd: process.cwd(), encoding: "utf8" });
+    const build = spawnSync(process.execPath, ["node_modules/vite/bin/vite.js", "build", "--config", "vite.site.config.ts"], { cwd: process.cwd(), encoding: "utf8" });
     expect(build.status, build.stderr || build.stdout).toBe(0);
     for (const route of ["index.html", "demo/index.html", "privacy/index.html", "terms/index.html", "404.html"]) {
       expect((await stat(join(process.cwd(), "dist/site", route))).isFile()).toBe(true);
