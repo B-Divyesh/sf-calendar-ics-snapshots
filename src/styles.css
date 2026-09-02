@@ -173,10 +173,16 @@ dialog p { line-height: 1.55; }
   .dialog-actions { flex-direction: column; }
   .demo-banner { align-items: flex-start; flex-direction: column; gap: 2px; padding: 9px 16px; }
   .demo-banner .text-button { min-height: 44px; }
-  .site-shell-header { min-height: 68px; padding: 10px 16px; }
-  .site-shell-header nav a:not(:nth-child(-n+2)) { display: none; }
+  .site-shell-header { min-height: 68px; gap: 8px; padding: 10px 16px; }
+  .site-shell-header nav { gap: 0; }
   .site-shell-footer { grid-template-columns: 1fr; }
   .site-shell-footer nav { flex-wrap: wrap; }
+}
+
+@media (max-width: 430px) {
+  .site-shell-header { min-height: 0; flex-wrap: wrap; gap: 6px; padding: 10px 14px; }
+  .site-shell-header nav { width: 100%; justify-content: space-between; border-top: 1px solid var(--rule); }
+  .site-shell-header nav a { flex: 1; padding: 6px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

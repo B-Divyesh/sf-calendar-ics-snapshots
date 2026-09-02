@@ -25,8 +25,36 @@ test("production static landing opens the isolated desktop sample instead of fal
 test("production static site serves the designed 404 with an HTTP 404 status", async ({ page }) => {
   const response = await page.goto("http://127.0.0.1:4175/definitely-missing-page");
   expect(response?.status()).toBe(404);
-  await expect(page.getByRole("heading", { level: 1, name: "This page is not in the archive." })).toBeVisible();
+  await expect(page).toHaveTitle("Page not found — Calendar Snapshotter");
+  await expect(page.getByRole("heading", { level: 1, name: "Page not found." })).toBeVisible();
+  await expect(page.getByText("The address may be incomplete or the page may have moved.")).toBeVisible();
   await expect(page.getByRole("link", { name: "Go to the home page" })).toBeVisible();
+});
+
+test("390px shared header keeps every legal route link visible and usable", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+
+  for (const route of ["/", "/demo/", "/privacy/", "/terms/", "/definitely-missing-page"]) {
+    await page.goto(`http://127.0.0.1:4175${route}`);
+    const headerLinks = page.locator("header nav a");
+    await expect(headerLinks).toHaveText(["Home", "Demo", "Privacy", "Terms"]);
+
+    for (const name of ["Home", "Demo", "Privacy", "Terms"]) {
+      const link = page.locator("header nav").getByRole("link", { name });
+      await expect(link, `${route} header ${name} link`).toBeVisible();
+      const box = await link.boundingBox();
+      expect(box, `${route} header ${name} has a box`).not.toBeNull();
+      expect(box!.height, `${route} header ${name} is a 44px target`).toBeGreaterThanOrEqual(44);
+    }
+
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+
+  await page.goto("http://127.0.0.1:4175/definitely-missing-page");
+  await page.locator("header nav").getByRole("link", { name: "Privacy" }).focus();
+  await expect(page.locator("header nav").getByRole("link", { name: "Privacy" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/privacy\/$/);
 });
 
 test("every public static route ships complete sharing and touch metadata", async ({ page, request }) => {

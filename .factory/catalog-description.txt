@@ -1,1 +1,1 @@
-Compare local calendar copies and restore changed or deleted events.
+Restore changed or deleted calendar events from local copies.
