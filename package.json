@@ -1,6 +1,6 @@
 {
   "name": "calendar-ics-snapshots",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,6 +11,9 @@
     "build:site": "vite build --config vite.site.config.ts",
     "serve:site": "node scripts/serve-static.mjs dist/site",
     "test": "vitest run",
+    "test:claims": "node scripts/run-claims.mjs",
+    "setup:native": "node scripts/setup-native-prerequisites.mjs",
+    "claim:native-caldav-transport": "npm run setup:native && cargo test --manifest-path src-tauri/Cargo.toml native_caldav_transport",
     "test:e2e": "playwright test",
     "test:e2e:static": "playwright test --config playwright.static.config.ts",
     "test:watch": "vitest",

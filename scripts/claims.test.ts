@@ -21,7 +21,7 @@ describe("claims contract", () => {
       expect(claim.where).not.toHaveLength(0);
       expect(claim.sandbox).not.toHaveLength(0);
       expect(source.match(new RegExp(`@claim:${claim.id}(?![a-z0-9-])`, "g")) ?? []).toHaveLength(1);
-      if (claim.test.startsWith("cargo test")) expect(claim.test).toContain("native_caldav_transport");
+      if (claim.id === "native-caldav-transport") expect(claim.test).toBe("npm run claim:native-caldav-transport");
       else expect(claim.test).toContain(`@claim:${claim.id}`);
     }
   });

@@ -50,9 +50,44 @@ function property(lines: string[], name: string): { value: string; fullName: str
   return { value: colon >= 0 ? line.slice(colon + 1) : "", fullName: line.slice(0, colon) };
 }
 
+function validateCalendarStructure(input: string): void {
+  const lines = unfoldIcs(input).map((line, index) => index === 0 ? line.replace(/^\uFEFF/, "") : line);
+  const stack: string[] = [];
+  let sawCalendar = false;
+  let closedCalendar = false;
+  const malformed = () => new Error("This iCalendar file is incomplete or malformed. Export it again, then choose the complete file.");
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) continue;
+    const component = line.match(/^(BEGIN|END):([A-Z0-9-]+)$/i);
+    if (!component) {
+      if (!stack.length) throw malformed();
+      continue;
+    }
+
+    const action = component[1].toUpperCase();
+    const name = component[2].toUpperCase();
+    if (action === "BEGIN") {
+      if (!stack.length) {
+        if (name !== "VCALENDAR" || sawCalendar || closedCalendar) throw malformed();
+        sawCalendar = true;
+      } else if (name === "VCALENDAR") throw malformed();
+      stack.push(name);
+      continue;
+    }
+
+    if (!stack.length || stack.at(-1) !== name) throw malformed();
+    stack.pop();
+    if (name === "VCALENDAR") closedCalendar = true;
+  }
+
+  if (!sawCalendar || !closedCalendar || stack.length) throw malformed();
+}
+
 function blocks(input: string, component: string): string[] {
   const normalized = input.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-  const expression = new RegExp(`BEGIN:${component}\\n[\\s\\S]*?END:${component}`, "gi");
+  const expression = new RegExp(`^BEGIN:${component}\\n[\\s\\S]*?^END:${component}(?=\\n|$)`, "gim");
   return normalized.match(expression) ?? [];
 }
 
@@ -74,6 +109,7 @@ function readableDate(value: string, fullName = ""): string {
 
 export function parseIcs(input: string): ParsedCalendar {
   if (!/BEGIN:VCALENDAR/i.test(input)) throw new Error("This file is not an iCalendar calendar.");
+  validateCalendarStructure(input);
   const calendarLines = unfoldIcs(input);
   const name = unescapeText(property(calendarLines, "X-WR-CALNAME")?.value || "Imported calendar");
   const events = blocks(input, "VEVENT").map((raw, index) => {
@@ -158,6 +194,7 @@ export function mergeCalDavResponse(response: string): string {
     .map((node) => node.textContent || "")
     .filter((value) => /BEGIN:VCALENDAR/i.test(value));
   if (!fragments.length) throw new Error("No calendar data was returned. Check the calendar collection URL.");
+  fragments.forEach((fragment) => parseIcs(fragment));
   const timezones = fragments.flatMap((value) => blocks(value, "VTIMEZONE"));
   const events = fragments.flatMap((value) => blocks(value, "VEVENT"));
   return ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Sociobot//Calendar Snapshotter 0.1//EN", ...timezones, ...events, "END:VCALENDAR", ""].join("\r\n");

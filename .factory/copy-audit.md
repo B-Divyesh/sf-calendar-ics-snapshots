@@ -16,11 +16,11 @@ This table records every visible landing-page line. Counts split on spaces. No l
 | The open sample archive works offline. | 6 | — |
 | Manual recovery is free; new scheduling licenses are paused. | 9 | — |
 | Download for Linux / Windows / macOS on GitHub | 6 each | — |
-| v0.1.4 · download check available | 5 | — |
+| v0.1.5 · download check available | 5 | — |
 | Published download ready. | 3 | — |
 | Check for a newer release | 5 | — |
 | The latest check was unavailable. | 5 | — |
-| The published v0.1.4 download is ready. | 6 | — |
+| The published v0.1.5 download is ready. | 6 | — |
 | Local calendar copies make changed appointments easier to recover. | 9 | — |
 | Local encrypted vault | 3 | — |
 | Added, moved, and cancelled events | 5 | — |
@@ -72,11 +72,11 @@ This table records every visible landing-page line. Counts split on spaces. No l
 | macOS / Linux | 3 | — |
 | Windows | 1 | — |
 | Download the Windows installer from the desktop downloads link above. | 10 | — |
-| Unsigned preview: v0.1.4 installers are not code-signed. | 7 | — |
+| Unsigned preview: v0.1.5 installers are not code-signed. | 7 | — |
 | Calendar Snapshotter · Local calendar copies and restore files | 9 | — |
 | All releases on GitHub (external) | 5 | — |
 | Editorial plate generated for this product; provenance is in the source repository. | 11 | — |
-| Built by Param Factory · v0.1.4 | 6 | — |
+| Built by Param Factory · v0.1.5 | 6 | — |
 
 ## Terminology
 

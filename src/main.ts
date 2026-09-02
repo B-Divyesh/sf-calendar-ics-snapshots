@@ -164,7 +164,7 @@ function renderApp(): void {
       <p id="status" class="status" role="status" aria-live="polite"></p>
       ${demoMode ? `<p class="demo-license-note">Scheduling is disabled in this sample.</p>` : `<button class="text-button" id="license-button">${unlocked ? "Scheduling license active" : "View the scheduling license"}</button>`}
     </footer>
-    ${staticDemoRoute ? `<footer class="site-shell-footer"><p>Calendar Snapshotter · Local calendar copies and restore files</p><nav aria-label="Footer navigation"><a href="/">Home</a><a href="/demo/">Demo</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-calendar-ics-snapshots" rel="noreferrer">Source on GitHub <span class="visually-hidden">(external)</span></a></nav><p>Built by Param Factory · v0.1.4</p></footer>` : ""}
+    ${staticDemoRoute ? `<footer class="site-shell-footer"><p>Calendar Snapshotter · Local calendar copies and restore files</p><nav aria-label="Footer navigation"><a href="/">Home</a><a href="/demo/">Demo</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-calendar-ics-snapshots" rel="noreferrer">Source on GitHub <span class="visually-hidden">(external)</span></a></nav><p>Built by Param Factory · v0.1.5</p></footer>` : ""}
     <dialog id="settings-dialog" aria-labelledby="settings-title">${renderSettings()}</dialog>
     <dialog id="license-dialog" aria-labelledby="license-title">${renderLicense()}</dialog>
     <dialog id="archive-dialog" aria-labelledby="archive-title">${renderArchiveImport()}</dialog>`;
@@ -396,7 +396,6 @@ async function importFile(event: Event): Promise<void> {
   if (!file || !vault) return;
   try {
     const ics = await file.text();
-    parseIcs(ics);
     await addSnapshot(ics, "file", file.name.replace(/\.ics$/i, "") || "Imported calendar");
   } catch (error) { announce(error instanceof Error ? error.message : "The file could not be read.", true); }
   input.value = "";
@@ -404,6 +403,7 @@ async function importFile(event: Event): Promise<void> {
 
 async function addSnapshot(ics: string, source: Snapshot["source"], sourceName: string): Promise<boolean> {
   if (!vault) return false;
+  const parsed = parseIcs(ics);
   const digest = await fingerprint(ics);
   if (vault.data.snapshots.at(-1)?.fingerprint === digest) {
     announce("No calendar changes. The latest encrypted calendar copy is already current.");
@@ -415,7 +415,7 @@ async function addSnapshot(ics: string, source: Snapshot["source"], sourceName: 
   selectedSnapshotId = snapshot.id;
   selectedChanges.clear();
   renderApp();
-  announce(`Calendar copy saved with ${parseIcs(ics).events.length} events.`);
+  announce(`Calendar copy saved with ${parsed.events.length} event${parsed.events.length === 1 ? "" : "s"}.`);
   return true;
 }
 

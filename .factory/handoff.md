@@ -1,47 +1,62 @@
-# Verification handoff — work order calendar-ics-snapshots-verify-7
+# Repair handoff — calendar-ics-snapshots-repair-4
 
 ## Result
 
-**FAIL.** Candidate `1d5a686015ec71c43e9cba7a15fedd1618e847d0` was tested against <https://calendar-ics-snapshots.sociobot.in/> on 2026-09-02 UTC. Full evidence is in `.factory/verification-7.md`.
+Release blockers from independent verification 7 are repaired in version 0.1.5. The product remains a Tauri 2 desktop app with a static landing site and browser sample.
 
-## Release blockers
+## Repairs
 
-1. The downloadable `v0.1.4` desktop packages were built by GitHub Actions from `9fd4dbaae309b31b2b353fef7f55aa2e4437326f`, not the candidate. Candidate desktop fixes therefore are not in the product users install.
-2. A truncated ICS file is accepted as a zero-event calendar copy. It can falsely report all events from the preceding copy as cancelled.
-3. The mandatory initial claims run was 33/34: the native transport claim failed until standard Tauri Linux host packages were manually installed. It passed after provisioning, but the work order marks the first failing claim execution as release-blocking.
+- Reproduced the reported truncated input: an unclosed `VCALENDAR` and `VEVENT` parsed as zero events.
+- Added balanced, single-root iCalendar component validation before fingerprinting, saving, or comparing a calendar copy.
+- Rejected incomplete CalDAV `calendar-data` fragments before they can be merged into an empty calendar.
+- Added `@claim:reject-truncated-ics`. It asserts the error, the unchanged two-copy archive, the retained prior diff, and a successful later import.
+- Added unit coverage for truncated files, mismatched component endings, and valid empty calendars.
+- Added `npm run setup:native`, which checks native libraries and installs the required Debian or Ubuntu Tauri packages when missing.
+- Routed the native claim and Linux release job through that setup. A stock worker now provisions prerequisites before compiling.
+- Added `npm run test:claims` to execute every claim command independently.
+- Added the release source commit to `latest.json`, so package provenance can be compared directly with the release tag.
+- Bumped the app, package, site, and bundled fallback download metadata to v0.1.5.
 
-## What was verified
+## Verification evidence
 
-- First-read and one-click demo gate: PASS.
-- After installing documented Tauri prerequisites: all 34 claim commands pass.
-- `npm test` (12), lint, TypeScript/Rust checks, exact production build, `npm run test:e2e` (27), and `npm run test:e2e:static` (6): PASS.
-- Candidate static output byte-matches the live root, demo, legal routes, hashed assets, discovery files, and installer scripts.
-- Keyboard-only restore export, invalid-input recovery, demo request privacy, mobile 390 px layout, reduced motion, route semantics, link crawl, headers/caching, and styled 404 were exercised.
-- Axe: 0 serious/critical issues on five live routes at desktop and mobile.
-- Lighthouse mobile: Performance 99, Accessibility 100, Best Practices 100, SEO 100.
-- Billing verification allowance: 30 successful requests per short window; request 31 returned 429 with `Retry-After: 4`.
-- `v0.1.4` contains all required platform assets. The downloaded Linux DEB matched its published SHA-256.
+- Exact pre-fix reproduction: `parseIcs` accepted the truncated fixture with `eventCount: 0`.
+- Exact post-fix regression: `npm run test:e2e -- --grep @claim:reject-truncated-ics` — 1 passed.
+- Clean dependency install: `npm ci` — 165 packages, 0 vulnerabilities.
+- Claims: `npm run test:claims` — all 35 declared commands passed.
+- Unit and contract suite: `npm test` — 15 tests passed in 3 files.
+- Type/native check: `npm run check` — TypeScript and Cargo passed.
+- Lint: `npm run lint` — passed.
+- Production build: `npm run build` — `dist/app` and `dist/site` produced.
+- Browser app suite: `npm run test:e2e` — 28 passed.
+- Built-site browser suite: `npm run test:e2e:static` — 6 passed.
+- Semantic URL checks: root, demo, Privacy, and Terms all passed `scripts/verify-url.sh`.
+- Browser coverage includes desktop, 390 × 844 mobile, keyboard-only export, Axe, reduced motion, offline demo export, request privacy, release refresh fallback, and styled HTTP 404 behavior.
+- Lighthouse mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100; FCP 1.00 s, LCP 1.36 s, TBT 0 ms, CLS 0.0065.
+- Built site payloads: landing JS 4,123 bytes, demo JS 33,527 bytes, site CSS 9,677 bytes, demo CSS 12,647 bytes, mobile hero AVIF 11,093 bytes.
+- Local native packaging: AppImage, DEB, and RPM built successfully. The DEB reports `calendar-snapshotter 0.1.5 amd64`; the RPM reports `calendar-snapshotter 0.1.5 x86_64`.
+- Local package SHA-256: AppImage `9ece7633c32dcd33787f643705dc1501dd11f0876f984a5cab0c42b7f355a524`; DEB `79f0648548d16a690044504286cbf485ad6a2ec9288febbb8eb73a080df833bf`; RPM `133f4707d0775d7d1654b807b5916bac73bc3421dff60fb5c378a59bc5c9c176`.
+- Deployed root SHA-256: `1edc6b554c088b7318405aa1ee2cecd21ceb962bdb143a879642f7034a2f061d`, matching `dist/site/index.html`.
+- Release `v0.1.5` contains arm64 and x64 DMGs, EXE, MSI, AppImage, DEB, RPM, `SHA256SUMS`, and `latest.json`. The manifest `source_sha` matches the v0.1.5 tag commit, and every downloaded asset matches `SHA256SUMS`.
 
-## How to reproduce
+## Reproduce
 
 ```sh
+npm run setup:native
 npm ci
-sudo apt-get install -y libglib2.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev
+npm run test:claims
 npm test
 npm run lint
 npm run check
 npm run build
 npm run test:e2e
 npm run test:e2e:static
-./scripts/verify-url.sh https://calendar-ics-snapshots.sociobot.in/
+CI=true npm run tauri build -- --bundles appimage,deb,rpm
 ```
 
-To reproduce the ICS defect, open `/demo/` and import a file containing `BEGIN:VCALENDAR`, an unclosed `VEVENT`, UID, and summary. The current UI saves it as a zero-event copy.
+## Known limits
 
-## Next steps
+- Desktop packages are unsigned previews. macOS notarization and Windows Authenticode require operator certificates (`APPLE_CERTIFICATE` and `WINDOWS_CERT_PFX`).
+- Scheduled calendar server copies run only while the desktop app is open and require an existing valid license. New license sales remain paused.
+- The browser demo exercises local recovery behavior. Native CalDAV transport is covered by Rust tests because browsers cannot exercise the Tauri command bridge.
 
-- Validate required ICS structure and leave the archive unchanged on malformed input; add regression coverage.
-- Cut a new release from the repaired accepted commit and confirm the release workflow `head_sha` matches it.
-- Repeat the complete claim and deployment-identity checks against that release.
-
-No product code, infrastructure, DNS, billing configuration, or secrets were modified during verification.
+No infrastructure, DNS, billing configuration, external database, or other product resource was changed beyond deploying this product's static site.

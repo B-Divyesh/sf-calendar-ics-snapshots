@@ -51,6 +51,24 @@ test("@claim:calendar-recovery a deleted event can be found and exported in unde
   expect(results.violations.filter((violation) => ["serious", "critical"].includes(violation.impact || ""))).toEqual([]);
 });
 
+test("@claim:reject-truncated-ics rejects an incomplete calendar without changing the archive", async ({ page }) => {
+  await page.goto("http://127.0.0.1:4174/demo/");
+  await expect(page.locator(".snapshot-item")).toHaveCount(2);
+
+  const truncated = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\nUID:truncated-1\r\nSUMMARY:Still open\r\n";
+  await page.locator("#ics-file").setInputFiles({ name: "truncated.ics", mimeType: "text/calendar", buffer: Buffer.from(truncated) });
+
+  await expect(page.locator("#status")).toHaveText("This iCalendar file is incomplete or malformed. Export it again, then choose the complete file.");
+  await expect(page.locator("#status")).toHaveAttribute("data-kind", "error");
+  await expect(page.locator(".snapshot-item")).toHaveCount(2);
+  await expect(page.getByText("Airport train")).toBeVisible();
+
+  const complete = wrap(event("after-error", "20260920T100000", "Complete calendar copy"));
+  await page.locator("#ics-file").setInputFiles({ name: "complete.ics", mimeType: "text/calendar", buffer: Buffer.from(complete) });
+  await expect(page.locator(".snapshot-item")).toHaveCount(3);
+  await expect(page.locator("#status")).toHaveText("Calendar copy saved with 1 event.");
+});
+
 test("landing composition remains usable at 390px", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("http://127.0.0.1:4174/");

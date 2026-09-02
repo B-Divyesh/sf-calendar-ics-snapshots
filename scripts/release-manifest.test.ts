@@ -13,21 +13,23 @@ describe("release workflow", () => {
     expect(workflow).toContain("windows-latest");
     expect(workflow).toContain("ubuntu-latest");
     const directory = await mkdtemp(join(tmpdir(), "calendar-snapshotter-release-"));
+    const sourceSha = "0123456789abcdef0123456789abcdef01234567";
     const assets = [
-      "Calendar.Snapshotter_0.1.4_aarch64.dmg",
-      "Calendar.Snapshotter_0.1.4_x64.dmg",
-      "Calendar.Snapshotter_0.1.4_x64-setup.exe",
-      "Calendar.Snapshotter_0.1.4_amd64.AppImage",
-      "Calendar.Snapshotter_0.1.4_amd64.deb",
-      "Calendar.Snapshotter_0.1.4_amd64.rpm"
+      "Calendar.Snapshotter_0.1.5_aarch64.dmg",
+      "Calendar.Snapshotter_0.1.5_x64.dmg",
+      "Calendar.Snapshotter_0.1.5_x64-setup.exe",
+      "Calendar.Snapshotter_0.1.5_amd64.AppImage",
+      "Calendar.Snapshotter_0.1.5_amd64.deb",
+      "Calendar.Snapshotter_0.1.5_amd64.rpm"
     ];
     try {
       await Promise.all(assets.map((name, index) => writeFile(join(directory, name), `fixture native package ${index}\n`)));
-      const generated = spawnSync(process.execPath, ["scripts/release-manifest.mjs", directory, "B-Divyesh/sf-calendar-ics-snapshots", "v0.1.4"], { cwd: process.cwd(), encoding: "utf8" });
+      const generated = spawnSync(process.execPath, ["scripts/release-manifest.mjs", directory, "B-Divyesh/sf-calendar-ics-snapshots", "v0.1.5", sourceSha], { cwd: process.cwd(), encoding: "utf8" });
       expect(generated.status, generated.stderr).toBe(0);
       expect((await stat(join(directory, "SHA256SUMS"))).size).toBeGreaterThan(0);
-      const manifest = JSON.parse(await readFile(join(directory, "latest.json"), "utf8")) as { version: string; platforms: Record<string, { name: string; url: string; sha256: string }> };
-      expect(manifest.version).toBe("v0.1.4");
+      const manifest = JSON.parse(await readFile(join(directory, "latest.json"), "utf8")) as { version: string; source_sha: string; platforms: Record<string, { name: string; url: string; sha256: string }> };
+      expect(manifest.version).toBe("v0.1.5");
+      expect(manifest.source_sha).toBe(sourceSha);
       expect(Object.keys(manifest.platforms).sort()).toEqual(["linux", "macos_arm64", "macos_x64", "windows"]);
       for (const platform of Object.values(manifest.platforms)) {
         expect(assets).toContain(platform.name);

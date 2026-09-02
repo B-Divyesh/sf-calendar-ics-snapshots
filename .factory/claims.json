@@ -7,6 +7,13 @@
     "sandbox": "fresh browser archive; import two changed ICS copies, select a deleted event, and download its restore file"
   },
   {
+    "id": "reject-truncated-ics",
+    "claim": "Rejects incomplete calendar files before changing the archive",
+    "where": "calendar file import error",
+    "test": "npm run test:e2e -- --grep @claim:reject-truncated-ics",
+    "sandbox": "shipped two-copy demo archive; import an unclosed VCALENDAR and VEVENT, assert the error and unchanged edition count, then import a complete file"
+  },
+  {
     "id": "sample-project",
     "claim": "Try the app with an isolated sample calendar project",
     "where": "landing first screen, demo page, desktop first-run screen",
@@ -87,8 +94,8 @@
     "id": "native-caldav-transport",
     "claim": "The desktop transport uses direct ICS GET requests and CalDAV REPORT requests",
     "where": "README direct ICS and CalDAV connection description",
-    "test": "cargo test --manifest-path src-tauri/Cargo.toml native_caldav_transport",
-    "sandbox": "native transport unit fixture; assert GET for an ICS URL, REPORT for a CalDAV collection URL, and rejection of another URL scheme"
+    "test": "npm run claim:native-caldav-transport",
+    "sandbox": "self-provisioned native prerequisites and native transport unit fixture; assert GET for an ICS URL, REPORT for a CalDAV collection URL, and rejection of another URL scheme"
   },
   {
     "id": "scheduled-caldav",
@@ -197,7 +204,7 @@
   },
   {
     "id": "release-packaging",
-    "claim": "Release packaging generates native package checksums and a platform manifest",
+    "claim": "Release packaging records its source commit and generates native package checksums and a platform manifest",
     "where": "README release workflow section",
     "test": "npm test -- -t @claim:release-packaging",
     "sandbox": "temporary native-package fixture; run the manifest generator and inspect every SHA256SUMS and latest.json platform entry"

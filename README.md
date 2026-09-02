@@ -33,13 +33,14 @@ Download the detected desktop installer from the [landing page](https://calendar
 curl -fsSL https://calendar-ics-snapshots.sociobot.in/install.sh | sh
 ```
 
-Preview packages are unsigned. GitHub Releases provides DMG, MSI/EXE, AppImage, DEB, and RPM assets. Each release includes a SHA-256 file-check list (`SHA256SUMS`).
+Preview packages are unsigned. GitHub Releases provides DMG, MSI/EXE, AppImage, DEB, and RPM assets. Each release includes a SHA-256 file-check list (`SHA256SUMS`) and a source commit in `latest.json`.
 
 ## Develop
 
-Requirements: Node.js 22+, Rust stable, and the [Tauri 2 system prerequisites](https://v2.tauri.app/start/prerequisites/).
+Requirements: Node.js 22+ and Rust stable. The setup command checks native prerequisites and installs the required Ubuntu or Debian packages when needed.
 
 ```sh
+npm run setup:native # run before the first claim, test, or native build
 npm ci
 npm run dev          # desktop UI in a browser
 npm run dev:site     # landing site
@@ -50,6 +51,8 @@ npm run tauri dev    # native desktop shell
 
 ```sh
 npm test             # parser, diff, restore, release-contract tests
+npm run test:claims  # every declared claim command, including native setup
+npm run claim:native-caldav-transport # provisions native libraries, then tests the desktop transport
 npm run test:e2e     # Chromium recovery journey + axe accessibility checks
 npm run check        # TypeScript and Rust checks
 npm run build        # dist/app and dist/site

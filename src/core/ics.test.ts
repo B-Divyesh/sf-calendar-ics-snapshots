@@ -9,6 +9,20 @@ describe("iCalendar core", () => {
     expect(unfoldIcs("SUMMARY:Long\r\n title")).toEqual(["SUMMARY:Longtitle"]);
   });
 
+  it("rejects a truncated calendar instead of treating it as an empty copy", () => {
+    const truncated = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\nUID:truncated-1\r\nSUMMARY:Still open\r\n";
+    expect(() => parseIcs(truncated)).toThrow("This iCalendar file is incomplete or malformed. Export it again, then choose the complete file.");
+  });
+
+  it("rejects mismatched component endings", () => {
+    const mismatched = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:mismatch\r\nEND:VCALENDAR\r\n";
+    expect(() => parseIcs(mismatched)).toThrow("incomplete or malformed");
+  });
+
+  it("accepts a complete calendar with no events", () => {
+    expect(parseIcs("BEGIN:VCALENDAR\r\nVERSION:2.0\r\nEND:VCALENDAR\r\n").events).toEqual([]);
+  });
+
   it("@claim:recurrence-timezones preserves a recurring override and timezone in a restore file", () => {
     const before = calendar(event("weekly", "20260828T100000", "Weekly") + event("weekly", "20260904T100000", "Weekly", "RECURRENCE-ID;TZID=Europe/Paris:20260904T100000\r\n"));
     const after = calendar(event("weekly", "20260828T100000", "Weekly") + event("weekly", "20260904T120000", "Weekly moved", "RECURRENCE-ID;TZID=Europe/Paris:20260904T100000\r\n"));
