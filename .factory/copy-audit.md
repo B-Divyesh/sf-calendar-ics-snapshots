@@ -1,4 +1,4 @@
-# Landing copy audit — 2026-09-01
+# Landing copy audit — 2026-09-02
 
 This table records every visible landing-page line. Counts split on spaces. No line exceeds 22 words or uses a banned marketing word.
 
@@ -13,8 +13,8 @@ This table records every visible landing-page line. Counts split on spaces. No l
 | Try it with sample data | 5 | — |
 | Opens a safe sample project. | 5 | — |
 | Sample data stays separate from your archive. | 7 | — |
-| Manual calendar copies and restore files are free. | 8 | — |
-| New scheduling licenses are not currently for sale. | 8 | — |
+| The open sample archive works offline. | 6 | — |
+| Manual recovery is free; new scheduling licenses are paused. | 9 | — |
 | Download for Linux / Windows / macOS on GitHub | 6 each | — |
 | v0.1.4 · download check available | 5 | — |
 | Published download ready. | 3 | — |
@@ -26,7 +26,7 @@ This table records every visible landing-page line. Counts split on spaces. No l
 | Added, moved, and cancelled events | 5 | — |
 | Calendar restore file (.ics) | 4 | — |
 | No analytics | 2 | — |
-| 01 / Why keep copies | 5 | — |
+| Why keep calendar copies | 4 | — |
 | Find what changed in a schedule. | 6 | — |
 | Meetings move. | 2 | — |
 | Events disappear. | 2 | — |
@@ -48,7 +48,7 @@ This table records every visible landing-page line. Counts split on spaces. No l
 | Calendar copies and saved sign-in details are encrypted before local storage. | 11 | — |
 | No calendar uploads | 3 | — |
 | The app has no analytics or third-party calendar processing. | 9 | — |
-| Open restore file | 3 | — |
+| Standard restore format | 3 | — |
 | Restore files use the standard calendar format (.ics). | 8 | — |
 | Important limit | 2 | — |
 | Scheduled copies run only while Calendar Snapshotter is open. | 9 | — |
@@ -70,7 +70,8 @@ This table records every visible landing-page line. Counts split on spaces. No l
 | Install from the command line | 5 | — |
 | Command-line installers. | 2 | — |
 | macOS / Linux | 3 | — |
-| Windows PowerShell | 2 | — |
+| Windows | 1 | — |
+| Download the Windows installer from the desktop downloads link above. | 10 | — |
 | Unsigned preview: v0.1.4 installers are not code-signed. | 7 | — |
 | Calendar Snapshotter · Local calendar copies and restore files | 9 | — |
 | All releases on GitHub (external) | 5 | — |
@@ -90,4 +91,4 @@ This table records every visible landing-page line. Counts split on spaces. No l
 
 ## Result
 
-PASS. The headline states the job, the audience appears next, and the sample action plus its outcome fit within the 390 × 844 first viewport.
+PASS. The headline states the job, the audience appears next, and the sample action plus its outcome and privacy/offline/price facts fit within the 390 × 844 first viewport. No line exceeds 22 words or uses a banned marketing word.

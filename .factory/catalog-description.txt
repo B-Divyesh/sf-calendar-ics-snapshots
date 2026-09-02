@@ -1,1 +1,1 @@
-Keep calendar copies, compare schedule changes, and restore lost events.
+Restore lost calendar events from private local copies.

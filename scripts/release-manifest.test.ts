@@ -1,19 +1,44 @@
 import { describe, expect, it } from "vitest";
-import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 describe("release workflow", () => {
-  it("@claim:release-packaging publishes checksums and a platform manifest", async () => {
+  it("@claim:release-packaging generates native-package checksums and a platform manifest", async () => {
     const workflow = await readFile(".github/workflows/release.yml", "utf8");
     expect(workflow).toContain("softprops/action-gh-release");
-    expect(workflow).toContain("latest.json");
-    expect(workflow).toContain("SHA256SUMS");
     expect(workflow).toContain("macos-latest");
     expect(workflow).toContain("windows-latest");
     expect(workflow).toContain("ubuntu-latest");
+    const directory = await mkdtemp(join(tmpdir(), "calendar-snapshotter-release-"));
+    const assets = [
+      "Calendar.Snapshotter_0.1.4_aarch64.dmg",
+      "Calendar.Snapshotter_0.1.4_x64.dmg",
+      "Calendar.Snapshotter_0.1.4_x64-setup.exe",
+      "Calendar.Snapshotter_0.1.4_amd64.AppImage",
+      "Calendar.Snapshotter_0.1.4_amd64.deb",
+      "Calendar.Snapshotter_0.1.4_amd64.rpm"
+    ];
+    try {
+      await Promise.all(assets.map((name, index) => writeFile(join(directory, name), `fixture native package ${index}\n`)));
+      const generated = spawnSync(process.execPath, ["scripts/release-manifest.mjs", directory, "B-Divyesh/sf-calendar-ics-snapshots", "v0.1.4"], { cwd: process.cwd(), encoding: "utf8" });
+      expect(generated.status, generated.stderr).toBe(0);
+      expect((await stat(join(directory, "SHA256SUMS"))).size).toBeGreaterThan(0);
+      const manifest = JSON.parse(await readFile(join(directory, "latest.json"), "utf8")) as { version: string; platforms: Record<string, { name: string; url: string; sha256: string }> };
+      expect(manifest.version).toBe("v0.1.4");
+      expect(Object.keys(manifest.platforms).sort()).toEqual(["linux", "macos_arm64", "macos_x64", "windows"]);
+      for (const platform of Object.values(manifest.platforms)) {
+        expect(assets).toContain(platform.name);
+        expect(platform.url).toContain(`/releases/latest/download/${encodeURIComponent(platform.name)}`);
+        expect(platform.sha256).toMatch(/^[a-f0-9]{64}$/);
+      }
+      const sums = await readFile(join(directory, "SHA256SUMS"), "utf8");
+      for (const asset of assets) expect(sums).toContain(`  ${asset}`);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
   });
 
   it("@claim:unsigned-preview does not configure macOS or Windows code signing", async () => {
@@ -29,11 +54,30 @@ describe("release workflow", () => {
       navigationFallback?: unknown;
       responseOverrides?: Record<string, { rewrite?: string }>;
       globalHeaders?: Record<string, string>;
+      routes?: { route?: string; headers?: Record<string, string> }[];
     };
     expect(config.navigationFallback).toBeUndefined();
     expect(config.responseOverrides?.["404"]?.rewrite).toBe("/404.html");
     expect(config.globalHeaders?.["Content-Security-Policy"]).toContain("frame-ancestors 'none'");
     expect(config.globalHeaders?.["X-Content-Type-Options"]).toBe("nosniff");
+    expect(config.routes).toEqual(expect.arrayContaining([expect.objectContaining({ route: "/assets/*", headers: { "Cache-Control": "public, max-age=31536000, immutable" } })]));
+    expect(await readFile("public/robots.txt", "utf8")).toContain("Sitemap:");
+    expect(await readFile("public/sitemap.xml", "utf8")).toContain("/demo/");
+  });
+
+  it("@claim:release-trigger runs for v tags and supports manual dispatch", async () => {
+    const workflow = await readFile(".github/workflows/release.yml", "utf8");
+    expect(workflow).toMatch(/push:\s*\n\s*tags:\s*\["v\*"\]/);
+    expect(workflow).toContain("workflow_dispatch:");
+  });
+
+  it("@claim:static-site-output builds every static route under dist/site", async () => {
+    const command = process.platform === "win32" ? "npm.cmd" : "npm";
+    const build = spawnSync(command, ["run", "build:site"], { cwd: process.cwd(), encoding: "utf8" });
+    expect(build.status, build.stderr || build.stdout).toBe(0);
+    for (const route of ["index.html", "demo/index.html", "privacy/index.html", "terms/index.html", "404.html"]) {
+      expect((await stat(join(process.cwd(), "dist/site", route))).isFile()).toBe(true);
+    }
   });
 
   it("@claim:checksum-install stops a mismatched download before it reaches the install directory", async () => {

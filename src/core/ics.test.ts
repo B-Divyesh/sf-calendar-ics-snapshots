@@ -9,10 +9,16 @@ describe("iCalendar core", () => {
     expect(unfoldIcs("SUMMARY:Long\r\n title")).toEqual(["SUMMARY:Longtitle"]);
   });
 
-  it("@claim:recurrence-timezones preserves recurrence overrides as distinct instances", () => {
-    const parsed = parseIcs(calendar(event("weekly", "20260828T100000", "Weekly") + event("weekly", "20260904T120000", "Weekly moved", "RECURRENCE-ID;TZID=Europe/Paris:20260904T100000\r\n")));
+  it("@claim:recurrence-timezones preserves a recurring override and timezone in a restore file", () => {
+    const before = calendar(event("weekly", "20260828T100000", "Weekly") + event("weekly", "20260904T100000", "Weekly", "RECURRENCE-ID;TZID=Europe/Paris:20260904T100000\r\n"));
+    const after = calendar(event("weekly", "20260828T100000", "Weekly") + event("weekly", "20260904T120000", "Weekly moved", "RECURRENCE-ID;TZID=Europe/Paris:20260904T100000\r\n"));
+    const parsed = parseIcs(before);
     expect(parsed.events).toHaveLength(2);
     expect(parsed.events[1].key).toContain("20260904T100000");
+    const restored = buildRestoreCalendar(before, diffCalendars(before, after));
+    expect(restored).toContain("BEGIN:VTIMEZONE");
+    expect(restored).toContain("RECURRENCE-ID;TZID=Europe/Paris:20260904T100000");
+    expect(restored).toContain("DTSTART;TZID=Europe/Paris:20260904T100000");
   });
 
   it("summarizes added, moved, and deleted events", () => {

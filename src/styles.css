@@ -57,7 +57,7 @@ input.visually-hidden { position: absolute!important; width: 1px!important; min-
 .app-header { min-height: 92px; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding: 18px 28px 14px; border-bottom: 3px double var(--ink); }
 .demo-banner { min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 6px 28px; border-bottom: 1px solid var(--ink); background: #e4e0d6; color: var(--ink); font-size: 12px; }
 .demo-banner span { display: flex; gap: 10px; }
-.app-wordmark { display: block; font-family: Georgia, "Times New Roman", serif; font-size: clamp(31px, 5vw, 56px); font-weight: 700; line-height: .9; text-decoration: none; }
+.app-wordmark { min-height: 44px; display: inline-flex; align-items: center; font-family: Georgia, "Times New Roman", serif; font-size: clamp(31px, 5vw, 56px); font-weight: 700; line-height: .9; text-decoration: none; }
 .app-header .eyebrow { margin-bottom: 6px; }
 .header-actions { display: flex; align-items: center; gap: 12px; color: var(--quiet); font-size: 12px; }
 .connection-state span { color: var(--green); }
@@ -115,6 +115,7 @@ input.visually-hidden { position: absolute!important; width: 1px!important; min-
 .app-footer { min-height: 56px; display: grid; grid-template-columns: 1fr 2fr 1fr; align-items: center; gap: 16px; padding: 6px 22px; border-top: 1px solid var(--ink); font-size: 12px; }
 .app-footer p { margin: 0; }
 .app-footer .text-button { justify-self: end; }
+.demo-license-note { justify-self: end; margin: 0; color: var(--quiet); font-size: 12px; line-height: 1.4; text-align: right; }
 
 dialog { width: min(620px, calc(100% - 32px)); max-height: calc(100vh - 32px); padding: clamp(24px, 5vw, 48px); border: 1px solid var(--ink); border-radius: 0; background: var(--paper); color: var(--ink); box-shadow: 16px 16px 0 rgba(23,23,19,.2); }
 dialog::backdrop { background: rgba(23,23,19,.72); }
@@ -167,6 +168,7 @@ dialog p { line-height: 1.55; }
   .app-footer { grid-template-columns: 1fr auto; min-height: 62px; padding-bottom: max(7px, env(safe-area-inset-bottom)); background: var(--paper); }
   .app-footer > p:first-child { display: none; }
   .app-footer .status { font-size: 10px; }
+  .demo-license-note { max-width: 18ch; }
   .dialog-actions { flex-direction: column; }
   .demo-banner { align-items: flex-start; flex-direction: column; gap: 2px; padding: 9px 16px; }
   .demo-banner .text-button { min-height: 44px; }

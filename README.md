@@ -27,14 +27,10 @@ The [browser demo](https://calendar-ics-snapshots.sociobot.in/demo/) uses separa
 
 ## Install
 
-Download the detected desktop installer from the [landing page](https://calendar-ics-snapshots.sociobot.in), or use an installer that checks the download before installing:
+Download the detected desktop installer from the [landing page](https://calendar-ics-snapshots.sociobot.in). macOS and Linux also have a command-line installer that checks the download before installing:
 
 ```sh
 curl -fsSL https://calendar-ics-snapshots.sociobot.in/install.sh | sh
-```
-
-```powershell
-irm https://calendar-ics-snapshots.sociobot.in/install.ps1 | iex
 ```
 
 Preview packages are unsigned. GitHub Releases provides DMG, MSI/EXE, AppImage, DEB, and RPM assets. Each release includes a SHA-256 file-check list (`SHA256SUMS`).
@@ -63,13 +59,13 @@ npm run build:site   # exact static deploy output: dist/site
 
 Run the claim checks declared in `.factory/claims.json`. You can run all browser claim coverage with `npm run test:e2e -- --grep @claim`.
 
-The release workflow runs for `v*` tags and can be dispatched manually. It builds native packages on GitHub-hosted macOS, Windows, and Linux runners.
+The release workflow runs for `v*` tags and supports manual dispatch. It builds native packages on GitHub-hosted macOS, Windows, and Linux runners.
 
-Static deployment publishes `dist/site`. It includes security headers, asset caching, `robots.txt`, `sitemap.xml`, and a styled 404.
+Static deployment publishes the built site in `dist/site`. It includes security headers, asset caching, discovery files, and a styled 404.
 
 ## Privacy and security model
 
-Calendar content and saved connection details are stored in one encrypted browser database record. Calendar requests go from the desktop app to the URL the user supplies. Use **Delete local archive** in the app to remove this vault.
+Calendar content and saved connection details are encrypted before local storage. Calendar requests go from the desktop app to the URL the user supplies. Use **Delete local archive** in the app to remove this vault.
 
 The product has no analytics, tracking scripts, remote fonts, or calendar-content services. License verification sends only the entered license token to Sociobot.
 

@@ -10,12 +10,12 @@ const isTauri = "__TAURI_INTERNALS__" in window;
 let vault: Vault | undefined;
 let selectedSnapshotId = "";
 let selectedChanges = new Set<string>();
-let unlocked = cachedUnlock();
 let scheduler: number | undefined;
 let pendingArchiveText = "";
 const staticDemoRoute = /^\/demo(?:\/|$)/.test(location.pathname);
 const demoMode = staticDemoRoute || new URLSearchParams(location.search).get("demo") === "1";
 const DEMO_PASSPHRASE = "sample calendar vault";
+let unlocked = demoMode ? false : cachedUnlock();
 
 if (staticDemoRoute) document.querySelector("#main")?.remove();
 if (demoMode) configureVaultStorage("demo:calendar-snapshotter");
@@ -31,7 +31,9 @@ function announce(message: string, error = false): void {
   }
 }
 
-captureLicense();
+// A demo must never read or write a visitor's license. It has no licensed
+// scheduling path, so avoid even parsing a returned production token here.
+if (!demoMode) captureLicense();
 
 async function start(): Promise<void> {
   if (demoMode) {
@@ -160,7 +162,7 @@ function renderApp(): void {
     <footer class="app-footer">
       <p>Encrypted here. Never uploaded.</p>
       <p id="status" class="status" role="status" aria-live="polite"></p>
-      <button class="text-button" id="license-button">${unlocked ? "Scheduling license active" : "View the scheduling license"}</button>
+      ${demoMode ? `<p class="demo-license-note">Scheduling is disabled in this sample.</p>` : `<button class="text-button" id="license-button">${unlocked ? "Scheduling license active" : "View the scheduling license"}</button>`}
     </footer>
     ${staticDemoRoute ? `<footer class="site-shell-footer"><p>Calendar Snapshotter · Local calendar copies and restore files</p><nav aria-label="Footer navigation"><a href="/">Home</a><a href="/demo/">Demo</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-calendar-ics-snapshots" rel="noreferrer">Source on GitHub <span class="visually-hidden">(external)</span></a></nav><p>Built by Param Factory · v0.1.4</p></footer>` : ""}
     <dialog id="settings-dialog" aria-labelledby="settings-title">${renderSettings()}</dialog>
@@ -219,7 +221,7 @@ function renderSettings(): string {
   return `<form method="dialog" id="connection-form">
     <div class="dialog-top"><p class="section-number">Schedule settings</p><button class="icon-button" type="button" data-close-settings aria-label="Close settings">×</button></div>
     <h2 id="settings-title">Scheduled calendar server copies</h2>
-    ${unlocked ? `<p>Save copies from a calendar server (CalDAV) while this desktop app is running. Sign-in details stay inside your encrypted vault.</p>
+    ${demoMode ? `<p>Scheduling is disabled in the sample project. The demo does not read, save, or verify licenses.</p>` : unlocked ? `<p>Save copies from a calendar server (CalDAV) while this desktop app is running. Sign-in details stay inside your encrypted vault.</p>
       <label for="caldav-url">Calendar file or server URL</label><input id="caldav-url" name="url" type="url" value="${escapeHtml(connection?.url || "")}" required>
       <label for="caldav-user">Username</label><input id="caldav-user" name="username" autocomplete="username" value="${escapeHtml(connection?.username || "")}">
       <label for="caldav-password">App password</label><input id="caldav-password" name="password" type="password" autocomplete="current-password" value="${escapeHtml(connection?.password || "")}">
@@ -234,6 +236,9 @@ function renderSettings(): string {
 }
 
 function renderLicense(): string {
+  if (demoMode) {
+    return `<div><div class="dialog-top"><p class="section-number">Sample project</p><button class="icon-button" data-close-license aria-label="Close license">×</button></div><h2 id="license-title">Scheduling is disabled in this sample.</h2><p>The sample never reads, saves, or verifies a license token.</p></div>`;
+  }
   return `<div>
     <div class="dialog-top"><p class="section-number">Scheduling license</p><button class="icon-button" data-close-license aria-label="Close license">×</button></div>
     <h2 id="license-title">Scheduling for existing license holders</h2>
@@ -299,7 +304,13 @@ function bindAppEvents(): void {
       announce(error instanceof Error ? error.message : "The sample could not be reset.", true);
     }
   });
-  document.querySelector("#start-real")?.addEventListener("click", () => {
+  document.querySelector("#start-real")?.addEventListener("click", () => void leaveDemo());
+}
+
+async function leaveDemo(): Promise<void> {
+  try {
+    vault = undefined;
+    await removeVaultStorage();
     if (staticDemoRoute) {
       location.assign("/");
       return;
@@ -307,7 +318,11 @@ function bindAppEvents(): void {
     const url = new URL(location.href);
     url.searchParams.delete("demo");
     location.assign(url.toString());
-  });
+  } catch (error) {
+    vault = await Vault.open(DEMO_PASSPHRASE);
+    renderApp();
+    announce(error instanceof Error ? error.message : "The sample could not be discarded.", true);
+  }
 }
 
 async function deleteArchive(): Promise<void> {
@@ -422,7 +437,7 @@ function exportSelected(): void {
 
 async function saveConnection(event: SubmitEvent): Promise<void> {
   event.preventDefault();
-  if (!vault || !unlocked) return;
+  if (!vault || !unlocked || demoMode) return;
   const data = new FormData(event.currentTarget as HTMLFormElement);
   vault.data.connection = {
     url: String(data.get("url") || "").trim(),
@@ -446,7 +461,7 @@ async function fetchCalendar(): Promise<string> {
 }
 
 async function runConnection(manual = false): Promise<void> {
-  if (!vault?.data.connection || !unlocked) return;
+  if (!vault?.data.connection || !unlocked || demoMode) return;
   const status = document.querySelector<HTMLElement>("#dialog-status");
   if (status) status.textContent = "Contacting calendar…";
   try {
@@ -465,6 +480,7 @@ async function runConnection(manual = false): Promise<void> {
 
 function startScheduler(): void {
   window.clearInterval(scheduler);
+  if (demoMode) return;
   scheduler = window.setInterval(() => {
     const connection = vault?.data.connection;
     if (!connection || connection.schedule === "manual" || !navigator.onLine || !unlocked) return;
@@ -475,6 +491,7 @@ function startScheduler(): void {
 
 async function restoreLicense(event: SubmitEvent): Promise<void> {
   event.preventDefault();
+  if (demoMode) return;
   const data = new FormData(event.currentTarget as HTMLFormElement);
   saveLicense(String(data.get("license") || ""));
   const status = document.querySelector<HTMLElement>("#license-status")!;

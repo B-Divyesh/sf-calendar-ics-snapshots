@@ -62,7 +62,8 @@ test("landing composition remains usable at 390px", async ({ page }) => {
   await expect(action).toBeVisible();
   await expect(outcome).toBeVisible();
   await expect(facts).toHaveCount(3);
-  await expect(page.getByText("New scheduling licenses are not currently for sale.")).toBeVisible();
+  await expect(page.getByText("The open sample archive works offline.")).toBeVisible();
+  await expect(page.getByText("Manual recovery is free; new scheduling licenses are paused.")).toBeVisible();
   const [actionBox, outcomeBox, lastFactBox] = await Promise.all([action.boundingBox(), outcome.boundingBox(), facts.last().boundingBox()]);
   expect(actionBox && actionBox.y + actionBox.height).toBeLessThanOrEqual(844);
   expect(outcomeBox && outcomeBox.y + outcomeBox.height).toBeLessThanOrEqual(844);
@@ -107,13 +108,38 @@ test("@claim:ics-restore-export exports the selected sample event as ICS", async
   expect(restore).toContain("Airport train");
 });
 
-test("@claim:demo-private @claim:no-event-telemetry uses only the demo database and no external requests", async ({ page }) => {
+test("@claim:demo-private @claim:no-event-telemetry uses only demo storage and never opens licensed demo controls", async ({ page }) => {
   const requests: string[] = [];
+  await page.addInitScript(() => {
+    localStorage.setItem("sb_license:calendar-ics-snapshots", "real-license-sentinel");
+    localStorage.setItem("sb_license:calendar-ics-snapshots:verdict", JSON.stringify({ valid: true, checkedAt: 1 }));
+  });
   page.on("request", (request) => requests.push(request.url()));
   await page.goto("http://127.0.0.1:4174/demo/");
+  await expect(page.locator(".snapshot-item")).toHaveCount(2);
   const databases = await page.evaluate(async () => (await indexedDB.databases()).map((database) => database.name));
   expect(databases).toContain("demo:calendar-snapshotter");
   expect(databases).not.toContain("calendar-snapshotter");
+  await expect(page.getByRole("button", { name: "View the scheduling license" })).toHaveCount(0);
+  await expect(page.locator(".demo-license-note")).toHaveText("Scheduling is disabled in this sample.");
+  await page.locator(".change-row.cancelled input").check();
+  const restoreDownload = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export 1 event" }).click();
+  await restoreDownload;
+  const archiveDownload = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export encrypted archive" }).click();
+  await archiveDownload;
+  await page.getByRole("button", { name: "Calendar server schedule" }).click();
+  await expect(page.locator("#settings-dialog")).toContainText("does not read, save, or verify licenses");
+  await expect(page.locator("#settings-dialog input")).toHaveCount(0);
+  await page.getByRole("button", { name: "Close settings" }).click();
+  await page.getByRole("button", { name: "Reset demo" }).click();
+  await expect(page.locator(".snapshot-item")).toHaveCount(2);
+  const storedLicense = await page.evaluate(() => ({
+    token: localStorage.getItem("sb_license:calendar-ics-snapshots"),
+    verdict: localStorage.getItem("sb_license:calendar-ics-snapshots:verdict")
+  }));
+  expect(storedLicense).toEqual({ token: "real-license-sentinel", verdict: JSON.stringify({ valid: true, checkedAt: 1 }) });
   expect(requests.every((url) => new URL(url).origin === new URL(page.url()).origin)).toBe(true);
 });
 
@@ -148,6 +174,43 @@ test("@claim:demo-reset restores the seed and leaves real storage untouched", as
     open.onerror = () => reject(open.error);
   }));
   expect(sentinel).toBe("real-data");
+});
+
+test("@claim:demo-leave discards changed sample data before returning to the landing page", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("real-vault-license-sentinel", "keep"));
+  await page.goto("http://127.0.0.1:4174/demo/");
+  await page.evaluate(async () => await new Promise<void>((resolve, reject) => {
+    const open = indexedDB.open("calendar-snapshotter", 1);
+    open.onupgradeneeded = () => open.result.createObjectStore("sentinels");
+    open.onsuccess = () => {
+      const db = open.result;
+      const transaction = db.transaction("sentinels", "readwrite");
+      transaction.objectStore("sentinels").put("real-vault", "keep");
+      transaction.oncomplete = () => { db.close(); resolve(); };
+      transaction.onerror = () => reject(transaction.error);
+    };
+    open.onerror = () => reject(open.error);
+  }));
+  const changed = wrap(event("demo-leave", "20260919T100000", "Discard this sample change"));
+  await page.locator("#ics-file").setInputFiles({ name: "demo-leave.ics", mimeType: "text/calendar", buffer: Buffer.from(changed) });
+  await expect(page.locator(".snapshot-item")).toHaveCount(3);
+  await page.getByRole("button", { name: "Leave demo" }).click();
+  await expect(page).toHaveURL("http://127.0.0.1:4174/");
+  expect(await page.evaluate(() => localStorage.getItem("real-vault-license-sentinel"))).toBe("keep");
+  await page.getByRole("link", { name: "Try it with sample data" }).click();
+  await expect(page.locator(".snapshot-item")).toHaveCount(2);
+  await expect(page.getByText("Discard this sample change")).toHaveCount(0);
+  const sentinel = await page.evaluate(async () => await new Promise((resolve, reject) => {
+    const open = indexedDB.open("calendar-snapshotter");
+    open.onsuccess = () => {
+      const db = open.result;
+      const get = db.transaction("sentinels", "readonly").objectStore("sentinels").get("keep");
+      get.onsuccess = () => { db.close(); resolve(get.result); };
+      get.onerror = () => reject(get.error);
+    };
+    open.onerror = () => reject(open.error);
+  }));
+  expect(sentinel).toBe("real-vault");
 });
 
 test("@claim:license-price keeps manual recovery, review, backup, and restore available without a license", async ({ page }) => {
@@ -461,7 +524,10 @@ test("landing, footer, and demo actions meet the 44px mobile target", async ({ p
   await page.goto("http://127.0.0.1:4174/");
   expect(await tooSmall()).toEqual([]);
   await page.goto("http://127.0.0.1:4174/demo/");
+  await expect(page.locator(".snapshot-item")).toHaveCount(2);
   expect(await tooSmall()).toEqual([]);
+  const wordmark = await page.locator(".app-wordmark").boundingBox();
+  expect(wordmark?.height).toBeGreaterThanOrEqual(44);
   for (const control of ["#reset-demo", "#start-real"]) {
     const box = await page.locator(control).boundingBox();
     expect(box?.width).toBeGreaterThanOrEqual(44);

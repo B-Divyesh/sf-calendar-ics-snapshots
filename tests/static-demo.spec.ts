@@ -106,5 +106,5 @@ test("public wording uses one calendar-copy term, literal labels, and identified
   await page.goto("http://127.0.0.1:4175/demo/");
   await expect(page.getByText("Local calendar archive")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Changes in this copy" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "View the scheduling license" })).toBeVisible();
+  await expect(page.locator(".demo-license-note")).toHaveText("Scheduling is disabled in this sample.");
 });

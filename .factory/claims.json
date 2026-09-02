@@ -29,10 +29,10 @@
   },
   {
     "id": "demo-private",
-    "claim": "Sample data stays separate from your archive",
+    "claim": "Sample data and demo controls stay separate from your archive",
     "where": "landing first screen, demo page, desktop demo banner, and README",
     "test": "npm run test:e2e -- --grep @claim:demo-private",
-    "sandbox": "fresh browser context at /demo/; record IndexedDB database names"
+    "sandbox": "fresh browser context at /demo/ with production-license sentinels; exercise demo export, schedule panel, and reset, then compare storage namespaces"
   },
   {
     "id": "no-event-telemetry",
@@ -112,6 +112,13 @@
     "sandbox": "fresh browser context with a real-database sentinel; import a third demo copy, reset, and assert the seed and sentinel"
   },
   {
+    "id": "demo-leave",
+    "claim": "Leaving the sample discards changed sample data without changing a real vault",
+    "where": "demo banner, README, and .factory/demo.md",
+    "test": "npm run test:e2e -- --grep @claim:demo-leave",
+    "sandbox": "fresh browser context with a real-vault sentinel; add a third sample copy, leave, re-enter, and assert the shipped two-copy seed"
+  },
+  {
     "id": "archive-roundtrip",
     "claim": "Exports and imports the full encrypted archive, including calendar copies and saved connection settings",
     "where": "desktop archive controls and README",
@@ -142,7 +149,7 @@
   {
     "id": "offline-local",
     "claim": "The open sample archive remains available without a network connection",
-    "where": "desktop offline status",
+    "where": "landing first screen and desktop offline status",
     "test": "npm run test:e2e -- --grep @claim:offline-local",
     "sandbox": "fresh browser context at /demo/; go offline, select a cancelled event, and export its restore file"
   },
@@ -176,8 +183,8 @@
   },
   {
     "id": "checksum-install",
-    "claim": "The command-line installer refuses a download with the wrong checksum",
-    "where": "README",
+    "claim": "The macOS and Linux command-line installer refuses a download with the wrong checksum",
+    "where": "landing install section and README",
     "test": "npm test -- -t @claim:checksum-install",
     "sandbox": "temporary Linux install directory with fixture release manifest and payload; assert a matching payload installs and a mismatched payload is rejected before installation"
   },
@@ -190,17 +197,31 @@
   },
   {
     "id": "release-packaging",
-    "claim": "Release builds publish native packages, SHA256SUMS, and a platform manifest",
+    "claim": "Release packaging generates native package checksums and a platform manifest",
     "where": "README release workflow section",
     "test": "npm test -- -t @claim:release-packaging",
-    "sandbox": "release workflow fixture; assert macOS, Windows, and Linux runners plus SHA256SUMS and latest.json publication"
+    "sandbox": "temporary native-package fixture; run the manifest generator and inspect every SHA256SUMS and latest.json platform entry"
   },
   {
     "id": "site-response-policy",
-    "claim": "Static deployment includes security headers and a styled 404 response",
+    "claim": "Static deployment includes security headers, asset caching, discovery files, and a styled 404 response",
     "where": "README release workflow section",
     "test": "npm test -- -t @claim:site-response-policy",
-    "sandbox": "static deployment configuration fixture; assert header policy and response override without a landing-page navigation fallback"
+    "sandbox": "static deployment fixture; assert header policy, immutable asset route, robots.txt, sitemap.xml, and styled 404 override"
+  },
+  {
+    "id": "release-trigger",
+    "claim": "The release workflow runs for v tags and supports manual dispatch",
+    "where": "README",
+    "test": "npm test -- -t @claim:release-trigger",
+    "sandbox": "release workflow fixture; assert the v tag trigger and workflow dispatch event"
+  },
+  {
+    "id": "static-site-output",
+    "claim": "Static deployment publishes the built site in dist/site",
+    "where": "README",
+    "test": "npm test -- -t @claim:static-site-output",
+    "sandbox": "fresh build; run the static-site build and assert every public route is emitted under dist/site"
   },
   {
     "id": "release-downloads",
