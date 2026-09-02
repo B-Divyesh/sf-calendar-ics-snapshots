@@ -92,3 +92,5 @@ This table records every visible landing-page line. Counts split on spaces. No l
 ## Result
 
 PASS. The headline states the job, the audience appears next, and the sample action plus its outcome and privacy/offline/price facts fit within the 390 × 844 first viewport. No line exceeds 22 words or uses a banned marketing word.
+
+The catalog description is “Compare local calendar copies and restore changed or deleted events.” It has 10 words, is 68 characters long, and begins with a verb.

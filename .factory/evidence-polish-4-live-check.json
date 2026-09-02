@@ -1,0 +1,207 @@
+{
+  "routes": {
+    "home": {
+      "status": 200,
+      "title": "Calendar Snapshotter — recover calendar changes",
+      "h1": 1,
+      "main": 1,
+      "overflow": false,
+      "errors": [],
+      "seriousAxeViolations": [],
+      "targetSizes": [],
+      "firstScreenBottoms": {
+        "action": 353.328125,
+        "outcome": 355.421875,
+        "finalFact": 445.421875
+      }
+    },
+    "privacy": {
+      "status": 200,
+      "title": "Privacy — Calendar Snapshotter",
+      "h1": 1,
+      "main": 1,
+      "overflow": false,
+      "errors": [],
+      "seriousAxeViolations": [],
+      "targetSizes": [
+        {
+          "label": "Skip to main content",
+          "width": 216.65625,
+          "height": 44
+        },
+        {
+          "label": "Calendar Snapshotter",
+          "width": 184.046875,
+          "height": 44
+        },
+        {
+          "label": "Home",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Demo",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "privacy@sociobot.in",
+          "width": 183.03125,
+          "height": 44
+        },
+        {
+          "label": "Home",
+          "width": 44.90625,
+          "height": 44
+        },
+        {
+          "label": "Demo",
+          "width": 44.90625,
+          "height": 44
+        },
+        {
+          "label": "Privacy",
+          "width": 66.578125,
+          "height": 44
+        },
+        {
+          "label": "Terms",
+          "width": 52.125,
+          "height": 44
+        },
+        {
+          "label": "Source on GitHub (external)",
+          "width": 131.59375,
+          "height": 44
+        }
+      ]
+    },
+    "terms": {
+      "status": 200,
+      "title": "Terms — Calendar Snapshotter",
+      "h1": 1,
+      "main": 1,
+      "overflow": false,
+      "errors": [],
+      "seriousAxeViolations": [],
+      "targetSizes": [
+        {
+          "label": "Skip to main content",
+          "width": 216.65625,
+          "height": 44
+        },
+        {
+          "label": "Calendar Snapshotter",
+          "width": 184.046875,
+          "height": 44
+        },
+        {
+          "label": "Home",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Demo",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "support@sociobot.in",
+          "width": 183.03125,
+          "height": 44
+        },
+        {
+          "label": "Home",
+          "width": 44.90625,
+          "height": 44
+        },
+        {
+          "label": "Demo",
+          "width": 44.90625,
+          "height": 44
+        },
+        {
+          "label": "Privacy",
+          "width": 66.578125,
+          "height": 44
+        },
+        {
+          "label": "Terms",
+          "width": 52.125,
+          "height": 44
+        },
+        {
+          "label": "Source on GitHub (external)",
+          "width": 131.59375,
+          "height": 44
+        }
+      ]
+    },
+    "missing": {
+      "status": 404,
+      "title": "Page not found — Calendar Snapshotter",
+      "h1": 1,
+      "main": 1,
+      "overflow": false,
+      "errors": [],
+      "seriousAxeViolations": [],
+      "targetSizes": []
+    }
+  },
+  "demo": {
+    "queryEntryUrl": "https://calendar-ics-snapshots.sociobot.in/demo/",
+    "resetCopies": 2,
+    "changedSampleAbsent": true,
+    "realStateAfterReset": {
+      "token": "live-real-license-sentinel",
+      "verdict": "{\"valid\":true,\"checkedAt\":1}",
+      "sentinel": "real-data"
+    },
+    "offlineDownload": "calendar-restore-2026-09-02.ics",
+    "sameOriginRequests": true,
+    "errors": [],
+    "seriousAxeViolations": []
+  },
+  "focus": {
+    "forwardFocused": true,
+    "backFocused": true,
+    "originalScroll": 4005,
+    "restoredScroll": 4005
+  },
+  "responseHeaders": {
+    "content-security-policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data:; script-src 'self'; style-src 'self'; connect-src 'self' https://api.github.com https://api.sociobot.in; upgrade-insecure-requests",
+    "x-content-type-options": "nosniff",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=()"
+  },
+  "links": [
+    {
+      "href": "https://calendar-ics-snapshots.sociobot.in/",
+      "status": 200
+    },
+    {
+      "href": "https://calendar-ics-snapshots.sociobot.in/demo/",
+      "status": 200
+    },
+    {
+      "href": "https://calendar-ics-snapshots.sociobot.in/privacy/",
+      "status": 200
+    },
+    {
+      "href": "https://calendar-ics-snapshots.sociobot.in/terms/",
+      "status": 200
+    },
+    {
+      "href": "https://github.com/B-Divyesh/sf-calendar-ics-snapshots/releases/download/v0.1.6/Calendar.Snapshotter_0.1.6_amd64.AppImage",
+      "status": 200
+    },
+    {
+      "href": "https://github.com/B-Divyesh/sf-calendar-ics-snapshots/releases/latest",
+      "status": 200
+    },
+    {
+      "href": "https://github.com/B-Divyesh/sf-calendar-ics-snapshots",
+      "status": 200
+    }
+  ]
+}
