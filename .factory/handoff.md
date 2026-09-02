@@ -61,3 +61,13 @@ CI=true npm run tauri build -- --bundles appimage,deb,rpm
 - The browser demo exercises local recovery behavior. Native CalDAV transport is covered by Rust tests because browsers cannot exercise the Tauri command bridge.
 
 No infrastructure, DNS, billing configuration, external database, or other product resource was changed beyond deploying this product's static site.
+
+---
+
+# Independent verification 8 handoff — PASS
+
+**Candidate and deployment:** `ef998fba21cded336bedb7b8fc215897117285fe` at <https://calendar-ics-snapshots.sociobot.in/> (2026-09-02 UTC).
+
+**PASS.** A clean `npm ci` followed first by `npm run test:claims` completed all 35 claim commands. `npm test` (15), `npm run lint`, `npm run check`, `npm run build`, `npm run test:e2e` (28), and `npm run test:e2e:static` (6) pass. Live desktop/mobile, keyboard, reduced-motion, Axe, outgoing-request, response-header, cache, and Lighthouse checks pass. The deployment byte-matches the built candidate and release `v0.1.6`/`latest.json` source identity is the candidate; a downloaded DEB matches the published checksum.
+
+The product is ready to use: visit `/demo/` for the isolated sample, or install a v0.1.6 release. New license sales remain paused. Installers remain unsigned previews; operator signing certificates are still needed for notarized/signed distribution. Full evidence is in `.factory/verification-8.md`.
