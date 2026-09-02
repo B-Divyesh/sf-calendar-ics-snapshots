@@ -47,6 +47,22 @@ test("every public static route ships complete sharing and touch metadata", asyn
   expect(social.ok()).toBe(true);
 });
 
+test("legal page links and buttons meet the 44px phone touch target", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const route of ["/privacy/", "/terms/"]) {
+    await page.goto(`http://127.0.0.1:4175${route}`);
+    await expect(page.locator('main a[href^="mailto:"]')).toBeVisible();
+    const targets = page.locator("a:visible, button:visible");
+    for (let index = 0; index < await targets.count(); index += 1) {
+      const target = targets.nth(index);
+      const box = await target.boundingBox();
+      expect(box, `${route} target ${await target.innerText()} has a box`).not.toBeNull();
+      expect(box!.height, `${route} target ${await target.innerText()} is at least 44px high`).toBeGreaterThanOrEqual(44);
+      expect(box!.width, `${route} target ${await target.innerText()} is at least 44px wide`).toBeGreaterThanOrEqual(44);
+    }
+  }
+});
+
 test("public routes share navigation, legal links, one task heading, and route focus", async ({ page }) => {
   for (const route of ["/", "/demo/", "/privacy/", "/terms/"]) {
     await page.goto(`http://127.0.0.1:4175${route}`);

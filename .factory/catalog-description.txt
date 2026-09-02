@@ -1,1 +1,1 @@
-Restore lost calendar events from private local copies.
+Compare local calendar copies and restore changed or deleted events.

@@ -243,5 +243,19 @@
     "where": "Privacy page, desktop archive controls, and README",
     "test": "npm run test:e2e -- --grep @claim:delete-local-vault",
     "sandbox": "fresh browser archive; import a calendar copy, confirm Delete local archive, and assert the IndexedDB vault record is absent"
+  },
+  {
+    "id": "runtime-requirements",
+    "claim": "Node.js 22 or newer and stable Rust are the supported development toolchains",
+    "where": "README Develop and release workflow",
+    "test": "npm test -- -t @claim:runtime-requirements",
+    "sandbox": "Node 22+ test process with repository engine and stable Rust declarations; invoke rustc and rustup, then cross-check the release workflow"
+  },
+  {
+    "id": "native-prerequisite-setup",
+    "claim": "On Ubuntu or Debian, setup installs missing native desktop libraries and a second run changes nothing",
+    "where": "README Develop",
+    "test": "npm test -- -t @claim:native-prerequisite-setup",
+    "sandbox": "isolated apt and pkg-config fixture with every required module absent; run the real setup twice, assert all modules resolve, and assert no second package-manager call"
   }
 ]

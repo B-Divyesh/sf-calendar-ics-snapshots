@@ -402,11 +402,19 @@ test("@claim:license-token-only @claim:invalid-license-locks-scheduling sends on
 
 test("@claim:free-accessibility-export keeps keyboard export and accessibility available without a license", async ({ page }) => {
   await page.goto("http://127.0.0.1:4174/demo/");
+  await expect(page.locator(".snapshot-item")).toHaveCount(2);
   expect(await page.evaluate(() => localStorage.getItem("sb_license:calendar-ics-snapshots"))).toBeNull();
-  await page.locator(".change-row.cancelled input").focus();
+  const cancelledEvent = page.locator(".change-row.cancelled input");
+  await expect(cancelledEvent).toBeVisible();
+  await cancelledEvent.focus();
+  await expect(cancelledEvent).toBeFocused();
   await page.keyboard.press("Space");
+  await expect(cancelledEvent).toBeChecked();
+  const exportButton = page.getByRole("button", { name: "Export 1 event" });
+  await expect(exportButton).toBeEnabled();
   const downloadPromise = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Export 1 event" }).focus();
+  await exportButton.focus();
+  await expect(exportButton).toBeFocused();
   await page.keyboard.press("Enter");
   await downloadPromise;
   const results = await new AxeBuilder({ page }).analyze();

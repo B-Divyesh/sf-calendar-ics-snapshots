@@ -12,6 +12,7 @@ describe("claims contract", () => {
       readFile("src/core/ics.test.ts", "utf8"),
       readFile("scripts/release-manifest.test.ts", "utf8"),
       readFile("scripts/claims.test.ts", "utf8"),
+      readFile("scripts/toolchain-prerequisites.test.ts", "utf8"),
       readFile("src-tauri/src/lib.rs", "utf8")
     ]);
     const source = testSources.join("\n");
