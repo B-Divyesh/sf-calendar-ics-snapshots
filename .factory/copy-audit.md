@@ -93,4 +93,4 @@ This table records every visible landing-page line. Counts split on spaces. No l
 
 PASS. The headline states the job, the audience appears next, and the sample action plus its outcome and privacy/offline/price facts fit within the 390 × 844 first viewport. No line exceeds 22 words or uses a banned marketing word.
 
-The catalog description is “Restore changed or deleted calendar events from local copies.” It has 9 words, is 59 characters long, and begins with a verb.
+The catalog description is “Restore changed or deleted calendar events from local copies.” It has 9 words, is 61 characters long, and begins with a verb.
