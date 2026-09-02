@@ -1,40 +1,27 @@
-# Handoff — polish round 2
+# Handoff — independent verification 6
 
 ## Result
 
-**PASS.** Commit `f4aaef12c4e1938bedf50a6bea630f2c9cb50103` closes every finding in `.factory/review-1.md` and `.factory/review-2.md`. It is pushed to `main` and deployed to <https://calendar-ics-snapshots.sociobot.in/>.
+**PASS** for candidate `f4aaef12c4e1938bedf50a6bea630f2c9cb50103` at <https://calendar-ics-snapshots.sociobot.in/> on 2026-09-02 UTC. Product code was not modified during verification.
 
-## What changed
+## What was done
 
-- Kept the demo shell safe through every normal demo action by removing **Lock vault** from demo mode. The header, persistent sample banner, Reset demo, Leave demo, and legal footer remain available until an explicit exit.
-- Replaced the ambiguous demo exit label with **Leave demo**.
-- Replaced unexplained checksum wording with plain download-check wording and documented the SHA-256 file-check list in README.
-- Reworked the free-feature claim test into a complete unlicensed import → review → restore export → encrypted archive export/import journey.
-- Prevented Android and iPhone visitors from receiving a Linux desktop binary. They see **View desktop downloads on GitHub** and a supported-platform explanation.
-- Removed the unsupported “Install with one command” promise, narrowed the encryption sentence to the registered privacy claim, and added a confirmed **Delete local archive** action with a claim test.
-- Updated the catalog description, copy audit, demo documentation, claims contract, and finding-by-finding mapping in `.factory/polish-2.md`.
+- Checked out the candidate in a fresh detached tree and ran `npm ci`.
+- Ran all 31 declared claim tests, the full unit/browser/static suites, lint, type/Rust check, exact production build, live first-read test, demo recovery flow, mobile/keyboard/reduced-motion checks, Axe, response headers, request logging, cache policy, release metadata, and checksum verification.
+- Installed standard Tauri Linux GLib/GTK/WebKit development packages only in the disposable verifier container so that the Rust checks could compile. No repository code was altered.
+- Wrote the full evidence record in `.factory/verification-6.md`.
 
-## Verification
+## How to verify
 
-Fresh clone: `/tmp/calendar-polish2-clean.hYwYo5/repo` at `f4aaef1`.
+- `npm ci && npm test && npm run lint && npm run check && npm run build`
+- `npm run test:e2e && npm run test:e2e:static`
+- `cargo test --manifest-path src-tauri/Cargo.toml native_caldav_transport`
+- Visit <https://calendar-ics-snapshots.sociobot.in/> and use **Try it with sample data**. The demo opens two Northstar calendar editions with a moved Planning review and cancelled Airport train; select the cancelled event and export its ICS restore file.
 
-- `npm ci` — pass, 0 reported dependency vulnerabilities.
-- Every one of the 31 exact commands declared in `.factory/claims.json` — pass from that fresh clone. This includes all 24 browser claim commands, 6 Vitest claim commands, and the native CalDAV command.
-- `npm test` — pass, 10 tests.
-- `npm run lint` — pass.
-- `npm run check` — pass after installing the documented Linux Tauri prerequisites (`libwebkit2gtk-4.1-dev`, GTK and related development libraries).
-- `npm run build` — pass; produced `dist/app` and `dist/site`. Static bundles remain within budget (site JS 1.80 kB gzip plus 0.71 kB route chunk; demo JS 10.22 kB gzip; CSS 3.46 kB gzip).
-- `npm run test:e2e` — pass, 26 tests.
-- `npm run test:e2e:static` — pass, 6 tests.
-- `cargo test --manifest-path src-tauri/Cargo.toml native_caldav_transport` — pass, 3 tests.
-- `scripts/verify-url.sh https://calendar-ics-snapshots.sociobot.in/` and `/demo/` — pass for title, language, main landmark, and image alternatives.
-- Live Playwright + Axe check — zero serious/critical findings on the mobile landing and demo; no console errors. The demo made only same-origin requests. Evidence screenshots: `.factory/evidence-polish-2-live-mobile-home.png` and `.factory/evidence-polish-2-live-demo.png`.
-- Live response checks: `/` returned 200, and `/definitely-missing-page` returned the designed 404 with HTTP 404.
+## Evidence summary
 
-## Deployment
+All declared claims passed. The live `index.html` and site JS/CSS assets hash-match the candidate build. Live browser QA had no root/demo console errors and Axe found no serious/critical findings across root, demo, Privacy, Terms, and the styled 404. The v0.1.4 release has macOS, Windows, and Linux packages, a manifest, and checksums; the downloaded Linux RPM matched `SHA256SUMS`.
 
-Built `dist/site` was deployed to the scoped production Static Web App `sf-calendar-ics-snapshots` in resource group `sociobot` with the Static Web Apps deployment CLI. The deployment reported: `https://lively-forest-0b1012c10.7.azurestaticapps.net`.
+## Known gaps / next steps
 
-## Known gaps / operator action
-
-None for this repair. Native installers remain intentionally unsigned as documented; the existing GitHub release workflow builds them on the supported platform runners.
+No release-blocking defects found. A Lighthouse run could not complete because its Chromium tab crashed while the first native Tauri compile saturated the disposable verifier container; independent bundle, cache, responsive, keyboard, header, visual, and Axe checks passed. The static product has no product-owned API or sign-in flow, so a 429 allowance or Entra identity check does not apply.
