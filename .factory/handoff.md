@@ -1,40 +1,40 @@
-# Handoff — adversarial first-read review 2
+# Handoff — polish round 2
 
 ## Result
 
-**FAIL.** `.factory/review-2.md` records four blocking and four major findings against candidate `5faf5a613f1d40264a67d4974e631578ea501276` and the live site checked on 2026-09-02 UTC. Product code was not modified.
+**PASS.** Commit `f4aaef12c4e1938bedf50a6bea630f2c9cb50103` closes every finding in `.factory/review-1.md` and `.factory/review-2.md`. It is pushed to `main` and deployed to <https://calendar-ics-snapshots.sociobot.in/>.
 
-## What was reviewed
+## What changed
 
-- Cold 390 × 844 and 1440 × 900 landing views.
-- One-click sample entry, populated demo, isolated IndexedDB storage, live reset, real-storage sentinel, offline export, and request log.
-- Every prior review/polish finding in `.factory/review-1.md` and `.factory/polish-1.md`, in both live behavior and source.
-- Every sentence, heading, label, and action on the landing page and README.
-- All claims, public routes, metadata, 404 behavior, links, header/footer consistency, focus/Back behavior, accessibility, security headers, and asset budgets.
-- Brief-implied import/export/sync and AI leverage.
+- Kept the demo shell safe through every normal demo action by removing **Lock vault** from demo mode. The header, persistent sample banner, Reset demo, Leave demo, and legal footer remain available until an explicit exit.
+- Replaced the ambiguous demo exit label with **Leave demo**.
+- Replaced unexplained checksum wording with plain download-check wording and documented the SHA-256 file-check list in README.
+- Reworked the free-feature claim test into a complete unlicensed import → review → restore export → encrypted archive export/import journey.
+- Prevented Android and iPhone visitors from receiving a Linux desktop binary. They see **View desktop downloads on GitHub** and a supported-platform explanation.
+- Removed the unsupported “Install with one command” promise, narrowed the encryption sentence to the registered privacy claim, and added a confirmed **Delete local archive** action with a claim test.
+- Updated the catalog description, copy audit, demo documentation, claims contract, and finding-by-finding mapping in `.factory/polish-2.md`.
 
 ## Verification
 
-Fresh clone: `/tmp/calendar-review2-clean.wC07f2`.
+Fresh clone: `/tmp/calendar-polish2-clean.hYwYo5/repo` at `f4aaef1`.
 
-- All 30 exact commands in `.factory/claims.json`: final PASS. The native claim required installation of the README’s Tauri Linux prerequisites, then passed 3 Rust tests.
-- `npm test`: PASS, 10 tests.
-- `npm run build`: PASS; `dist/app` and `dist/site` produced.
-- `npm run lint`: PASS.
-- `npm run check`: PASS.
-- `npm run test:e2e`: PASS, 24 tests.
-- `npm run test:e2e:static`: PASS, 6 tests.
-- `scripts/verify-url.sh` against live root and demo: PASS.
-- Live Axe: zero serious/critical findings on root, demo, Privacy, Terms, and 404.
-- Crawled internal and GitHub links: all returned 200 after redirects.
+- `npm ci` — pass, 0 reported dependency vulnerabilities.
+- Every one of the 31 exact commands declared in `.factory/claims.json` — pass from that fresh clone. This includes all 24 browser claim commands, 6 Vitest claim commands, and the native CalDAV command.
+- `npm test` — pass, 10 tests.
+- `npm run lint` — pass.
+- `npm run check` — pass after installing the documented Linux Tauri prerequisites (`libwebkit2gtk-4.1-dev`, GTK and related development libraries).
+- `npm run build` — pass; produced `dist/app` and `dist/site`. Static bundles remain within budget (site JS 1.80 kB gzip plus 0.71 kB route chunk; demo JS 10.22 kB gzip; CSS 3.46 kB gzip).
+- `npm run test:e2e` — pass, 26 tests.
+- `npm run test:e2e:static` — pass, 6 tests.
+- `cargo test --manifest-path src-tauri/Cargo.toml native_caldav_transport` — pass, 3 tests.
+- `scripts/verify-url.sh https://calendar-ics-snapshots.sociobot.in/` and `/demo/` — pass for title, language, main landmark, and image alternatives.
+- Live Playwright + Axe check — zero serious/critical findings on the mobile landing and demo; no console errors. The demo made only same-origin requests. Evidence screenshots: `.factory/evidence-polish-2-live-mobile-home.png` and `.factory/evidence-polish-2-live-demo.png`.
+- Live response checks: `/` returned 200, and `/definitely-missing-page` returned the designed 404 with HTTP 404.
 
-## Findings to address
+## Deployment
 
-1. Reopened F-1-6: Lock vault removes the demo banner, reset/exit controls, header, and footer.
-2. Reopened F-1-12: unexplained checksum wording remains.
-3. F-2-1: `license-price` passes by checking copy, not the promised free operations.
-4. F-2-2: Android and iPhone visitors receive a Linux x86_64 AppImage action.
-5. F-2-3 through F-2-5: three public claims lack matching claim entries/tests.
-6. F-2-6: Start for real returns home without naming that result.
+Built `dist/site` was deployed to the scoped production Static Web App `sf-calendar-ics-snapshots` in resource group `sociobot` with the Static Web Apps deployment CLI. The deployment reported: `https://lively-forest-0b1012c10.7.azurestaticapps.net`.
 
-See `.factory/review-2.md` for exact quotes, evidence, copy counts, and required fixes.
+## Known gaps / operator action
+
+None for this repair. Native installers remain intentionally unsigned as documented; the existing GitHub release workflow builds them on the supported platform runners.
